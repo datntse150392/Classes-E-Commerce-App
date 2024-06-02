@@ -1,8 +1,32 @@
 import React from "react";
 import { FaGoogle, FaApple, FaUser, FaLock } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+// IMPORT API SERVICES
+import { useAuthService } from "../../services/index";
 
 const LoginForm = () => {
+  const [username, setUsername] = useState();
+  const [password, setPassword] = useState();
+
+  // Behavior variables
+  const navigate = useNavigate();
+
+  const { login } = useAuthService();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const response = await login(username, password);
+    console.log(response);
+    if (response !== null && response._statusCode === 200) {
+      localStorage.setItem("UserInfo", JSON.stringify(response._data));
+      navigate("/");
+    } else {
+      alert("Login failed");
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-10 rounded-lg shadow-lg w-full max-w-lg">
@@ -16,9 +40,10 @@ const LoginForm = () => {
           <div className="relative">
             <FaUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
-              type="email"
-              placeholder="Enter email or phone number"
+              type="text"
+              placeholder="Username"
               className="w-full py-4 pl-12 pr-4 border rounded-full focus:outline-none focus:ring focus:border-blue-300"
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="relative">
@@ -27,6 +52,7 @@ const LoginForm = () => {
               type="password"
               placeholder="Password"
               className="w-full py-4 pl-12 pr-4 border rounded-full focus:outline-none focus:ring focus:border-blue-300"
+              onChange={(e) => setPassword(e.target.value)}
             />
             <button
               type="button"
@@ -55,7 +81,7 @@ const LoginForm = () => {
               Forgot password?
             </a>
           </div>
-          <button className="w-full bg-primary text-white py-3 rounded-full font-semibold hover:bg-primary-dark">
+          <button onClick={(e) => handleLogin(e)} className="w-full bg-primary text-white py-3 rounded-full font-semibold hover:bg-primary-dark">
             Log in to continue
           </button>
         </form>
