@@ -1,7 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "../../components/Client/ProductCard";
 
+// IMPORT API SERVICES
+import { useEyeGlassService } from "../../services/index";
+
 const Homepage = () => {
+  const [data, setData] = useState([]);
+  // Behavior variables
+  const [loading, setLoading] = useState(true);
+
+  // API variables
+  const { fetchAllEyeGlass } = useEyeGlassService();
+
+  useEffect(() => {
+    const initEyeGlassData = async () => {
+      const initEyeGlassData = await fetchAllEyeGlass();
+      console.log(initEyeGlassData);
+      if (initEyeGlassData._statusCode === 200) {
+        setData(initEyeGlassData._data);
+        setLoading(false);
+      }
+    };
+    initEyeGlassData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto p-4 flex">
       {/* Main Content Section */}
@@ -58,11 +84,12 @@ const Homepage = () => {
             </a>
           </div>
           <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, index) => (
+            {data.map((item, index) => (
               <ProductCard
-                key={index}
-                name="Sanded ceramic vase"
-                price={280}
+                key={item.id}
+                id={item.id}
+                name={item.glassName}
+                price={item.glassPrice}
                 rating={4}
                 isNew={index === 0}
                 isHot={index === 1 || index === 2}
@@ -90,14 +117,15 @@ const Homepage = () => {
             </a>
           </div>
           <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, index) => (
+            {data.map((item, index) => (
               <ProductCard
-                key={index}
-                name="Turquoise ceramic plate"
-                price={180}
-                rating={5}
-                isNew={false}
-                isHot={index === 0}
+                key={item.id}
+                id={item.id}
+                name={item.glassName}
+                price={item.glassPrice}
+                rating={4}
+                isNew={index === 0}
+                isHot={index === 1 || index === 2}
                 isSoldOut={index === 3}
               />
             ))}
@@ -122,14 +150,15 @@ const Homepage = () => {
             </a>
           </div>
           <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, index) => (
+            {data.map((item, index) => (
               <ProductCard
-                key={index}
-                name="Enamel crucible"
-                price={270}
+                key={item.id}
+                id={item.id}
+                name={item.glassName}
+                price={item.glassPrice}
                 rating={4}
-                isNew={false}
-                isHot={index === 0}
+                isNew={index === 0}
+                isHot={index === 1 || index === 2}
                 isSoldOut={index === 3}
               />
             ))}

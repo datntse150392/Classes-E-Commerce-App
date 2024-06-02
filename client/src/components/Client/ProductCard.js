@@ -1,24 +1,29 @@
 import React from "react";
 import { FaStar, FaHeart } from "react-icons/fa";
 
-const ProductCard = ({ name, price, rating, isNew, isHot, isSoldOut }) => {
+import { Link } from "react-router-dom";
+
+const ProductCard = ({ id, name, price, rating, isNew, isHot, isSoldOut }) => {
   return (
     <div className="bg-white p-4 shadow rounded-md text-center relative">
       <div className="bg-gray-300 h-32 mb-2 flex justify-center items-center">
-        <img
-          src="https://via.placeholder.com/100x100"
-          alt={name}
-          className="h-full w-auto"
-        />
+        <Link to={`product/${id}`}>
+          <img
+            src="https://via.placeholder.com/100x100"
+            alt={name}
+            className="h-full w-auto"
+          />
+        </Link>
       </div>
-      <p className="text-sm">{name}</p>
+      <Link to={`product/${id}`}>
+        <p className="text-sm">{name}</p>
+      </Link>
       <div className="flex justify-center items-center my-1">
         {[...Array(5)].map((_, i) => (
           <FaStar
             key={i}
-            className={`mr-1 ${
-              i < rating ? "text-yellow-400" : "text-gray-300"
-            }`}
+            className={`mr-1 ${i < rating ? "text-yellow-400" : "text-gray-300"
+              }`}
           />
         ))}
       </div>
