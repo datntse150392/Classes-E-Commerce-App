@@ -18,7 +18,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const initEyeGlassData = async () => {
       const initEyeGlassData = await fetchEyeGlassById(id);
-      if (initEyeGlassData._statusCode === 200) {
+      if (initEyeGlassData !== null && initEyeGlassData._statusCode === 200) {
         let addFakeData = initEyeGlassData._data;
         addFakeData.images = [
           "https://via.placeholder.com/400x400",

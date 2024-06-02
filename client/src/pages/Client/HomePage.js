@@ -15,8 +15,7 @@ const Homepage = () => {
   useEffect(() => {
     const initEyeGlassData = async () => {
       const initEyeGlassData = await fetchAllEyeGlass();
-      console.log(initEyeGlassData);
-      if (initEyeGlassData._statusCode === 200) {
+      if (initEyeGlassData !== null && initEyeGlassData._statusCode === 200) {
         setData(initEyeGlassData._data);
         setLoading(false);
       }
