@@ -6,8 +6,15 @@ import Homepage from "./pages/Client/HomePage";
 import SignUpForm from "./components/Client/SignUpForm";
 import ProductDetail from "./components/Client/ProductDetail";
 import CheckoutStep from "./components/Client/CheckoutStep";
-import PaymentStep from "./components/PaymentStep";
 import CartStep from "./components/Client/CartStep";
+import SelectLenses from "./components/Client/SelectLenses";
+import AdminLayout from "./layouts/AdminLayout";
+import PaymentStep from "./components/PaymentStep";
+import Dashboard from "./pages/Admin/Dashboard";
+import Orders from "./pages/Admin/OrdersPage";
+import Eyeglasses from "./pages/Admin/EyeglassesPage";
+import Lenses from "./pages/Admin/LensesPage";
+import Users from "./pages/Admin/UsersPage";
 
 const AppRoutes = () => {
   return (
@@ -56,6 +63,14 @@ const AppRoutes = () => {
             </ClientLayout>
           }
         />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="eyeglasses" element={<Eyeglasses />} />
+          <Route path="lenses" element={<Lenses />} />
+          <Route path="users" element={<Users />} />
+        </Route>
+        <Route path="/select-lenses/:id" element={<SelectLenses />} />
       </Routes>
     </Router>
   );
