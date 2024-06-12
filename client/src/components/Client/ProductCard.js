@@ -1,15 +1,23 @@
-import React from "react";
+import React, {useEffect, useLayoutEffect, useState} from "react";
 import { FaStar, FaHeart } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ id, name, price, rating, isNew, isHot, isSoldOut }) => {
+const ProductCard = ({ id, name, price, rating, isNew, isHot, isSoldOut, image }) => {
+  const [imageUrl, setImageUrl] = useState("https://img.ebdcdn.com/product/frame/gray/mt6960_0.jpg?im=Resize,width=600,height=300,aspect=fill;UnsharpMask,sigma=1.0,gain=1.0&q=85");
+
+  // Có data image thì mở comment dòng dưới
+  // useLayoutEffect(() => {
+  //   if (image && image.length > 0) {
+  //     setImageUrl(image[0].url);
+  //   }
+  // }, [image]);
   return (
     <div className="bg-white p-4 shadow rounded-md text-center relative">
-      <div className="bg-gray-300 h-32 mb-2 flex justify-center items-center">
+      <div className="bg-[#f5f5f5] h-32 mb-2 flex justify-center items-center">
         <Link to={`product/${id}`}>
           <img
-            src="https://via.placeholder.com/100x100"
+            src={imageUrl}
             alt={name}
             className="h-full w-auto"
           />

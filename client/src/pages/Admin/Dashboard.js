@@ -1,4 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+// IMPORT API SERVICES
+import { useDashboardService, useEyeGlassService } from "../../services/index";
+
 import {
   LineChart,
   Line,
@@ -35,28 +39,166 @@ const pieData = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const Dashboard = () => {
+
+  // Data variables
+  const [accounts, setAccounts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [orderDetails, setOrderDetails] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+  const [dataMetrics, setDataMetrics] = useState({});
+  const [products, setProducts] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [topSellProducts, setTopSellProducts] = useState([]);
+
+  // Behavior variables
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // API variables
+  const { getAllAccount, getAllOrder, getAllOrderDetail, getAllPayment, getAllProfile  } = useDashboardService();
+  const { fetchAllEyeGlass } = useEyeGlassService();
+
+  useEffect(() => {
+    const fetchData = () => {
+      Promise.all([
+        getAllAccount(),
+        getAllOrder(),
+        getAllOrderDetail(),
+        getAllPayment(),
+        getAllProfile(),
+        fetchAllEyeGlass()
+      ])
+        .then(([accounts, orders, orderDetails, payments, profiles, eyeGlass]) => {
+          if (accounts && orders && orderDetails && payments && profiles && eyeGlass) {
+            setAccounts(accounts.data);
+            setOrders(orders.data);
+            setOrderDetails(orderDetails);
+            setPayments(payments);
+            setProfiles(profiles._data);
+            setProducts(eyeGlass.data);
+            calculateMetrics(payments)
+            mappingDatePaymentWithAccount(payments, accounts.data)
+            getTopThreeSellProducts(orderDetails, eyeGlass.data)
+            setLoading(false);
+          } else {
+            setError("Failed to fetch data");
+            setLoading(false);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          setError("Failed to fetch data");
+          setLoading(false);
+        });
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  // LOGIC TO CALCULATE DASHBOARD METRICS
+  function calculateMetrics(data) {
+    let totalOrders = 0;
+    let totalAmount = 0;
+    let totalSuccessfulPayments = 0;
+    let totalFailedPayments = 0;
+    let totalAmountByPaymentMethod = {};
+  
+    data.forEach((item) => {
+      totalOrders += 1;
+      totalAmount += item.totalAmount;
+  
+      if (item.status) {
+        totalSuccessfulPayments += 1;
+      } else {
+        totalFailedPayments += 1;
+      }
+  
+      if (!totalAmountByPaymentMethod[item.paymentMethod]) {
+        totalAmountByPaymentMethod[item.paymentMethod] = 0;
+      }
+      totalAmountByPaymentMethod[item.paymentMethod] += item.totalAmount;
+    });
+  
+    setDataMetrics({
+      totalOrders,
+      totalAmount,
+      totalSuccessfulPayments,
+      totalFailedPayments,
+      totalAmountByPaymentMethod
+    });
+  };
+
+  // Mapping data payments with accountID to get account.profiles.fullname
+  function mappingDatePaymentWithAccount(payments, accounts) {
+    let recentTransactions = [];
+    payments.map(payment => {
+      accounts.map(account => {
+        if (payment.accountID === account.id) {
+          recentTransactions.push({
+            id: payment.id,
+            account: account.profiles[0].fullname,
+            totalAmount: payment.totalAmount,
+            status: payment.status,
+            paymentMethod: payment.paymentMethod,
+            date: payment.date
+          });
+        }
+      });
+    });
+    recentTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+    setRecentTransactions(recentTransactions);
+  }
+
+  const convertDateToString = (date) => {
+    return new Date(date).toLocaleDateString();
+  }
+
+  function getTopThreeSellProducts(orderDetails, products) {
+    // Mapping data orderDetails with products
+    orderDetails.map(orderDetail => {
+      products.map(product => {
+        if (orderDetail.productGlassID === product.eyeGlassTypeID) {
+          orderDetail.name = product.name;
+        }
+      });
+    });
+    console.log(orderDetails);
+    let topSellProducts = orderDetails.sort((a, b) => b.quantity - a.quantity).slice(0, 3);
+    console.log(topSellProducts);
+    setTopSellProducts(topSellProducts);
+  }
+
   return (
     <div className="p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white shadow rounded-lg p-4">
           <p className="text-gray-600">Total Orders</p>
-          <p className="text-3xl font-bold">1,500</p>
-          <p className="text-green-500">+12% from last month</p>
+          <p className="text-3xl font-bold">{dataMetrics.totalOrders}</p>
+          {/* <p className="text-green-500">+12% from last month</p> */}
         </div>
         <div className="bg-white shadow rounded-lg p-4">
           <p className="text-gray-600">Total Products</p>
-          <p className="text-3xl font-bold">350</p>
-          <p className="text-green-500">+8% from last month</p>
+          <p className="text-3xl font-bold">{products.length}</p>
+          {/* <p className="text-green-500">+8% from last month</p> */}
         </div>
         <div className="bg-white shadow rounded-lg p-4">
           <p className="text-gray-600">Total Revenue</p>
-          <p className="text-3xl font-bold">$45,000</p>
-          <p className="text-red-500">-5% from last month</p>
+          <p className="text-3xl font-bold">${dataMetrics.totalAmount}</p>
+          {/* <p className="text-red-500">-5% from last month</p> */}
         </div>
         <div className="bg-white shadow rounded-lg p-4">
           <p className="text-gray-600">Cancelled Orders</p>
-          <p className="text-3xl font-bold">50</p>
-          <p className="text-red-500">-2% from last month</p>
+          <p className="text-3xl font-bold">{dataMetrics.totalFailedPayments}</p>
+          {/* <p className="text-red-500">-2% from last month</p> */}
         </div>
       </div>
 
@@ -101,7 +243,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-white shadow rounded-lg p-4">
           <h2 className="text-xl font-bold mb-4">Recent Orders</h2>
           <table className="w-full">
@@ -110,40 +252,43 @@ const Dashboard = () => {
                 <th className="text-left py-2">Order ID</th>
                 <th className="text-left py-2">Customer</th>
                 <th className="text-left py-2">Total</th>
+                <th className="text-left py-2">Method</th>
+                <th className="text-left py-2">Date</th>
                 <th className="text-left py-2">Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="py-2">#1001</td>
-                <td className="py-2">John Doe</td>
-                <td className="py-2">$200</td>
-                <td className="py-2">Completed</td>
-              </tr>
-              <tr>
-                <td className="py-2">#1002</td>
-                <td className="py-2">Jane Smith</td>
-                <td className="py-2">$300</td>
-                <td className="py-2">Pending</td>
-              </tr>
-              <tr>
-                <td className="py-2">#1003</td>
-                <td className="py-2">Bob Johnson</td>
-                <td className="py-2">$150</td>
-                <td className="py-2">Cancelled</td>
-              </tr>
-              <tr>
-                <td className="py-2">#1004</td>
-                <td className="py-2">Alice Brown</td>
-                <td className="py-2">$400</td>
-                <td className="py-2">Completed</td>
-              </tr>
+              {recentTransactions.map((item, index) => (
+                <tr key={item.id}>
+                  <td className="py-2">{index + 1}</td>
+                  <td className="py-2">{item.account}</td>
+                  <td className="py-2">${item.totalAmount}</td>
+                  <td className="py-2">{item.paymentMethod}</td>
+                  <td className="py-2">{convertDateToString(item.date)}</td>
+                  <td className="py-2">{item.status ? "Success" : "Fail"}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         <div className="bg-white shadow rounded-lg p-4">
           <h2 className="text-xl font-bold mb-4">Top Selling Products</h2>
           <ul>
+            {/* {topSellProducts.map((item, index) => (
+              <li key={item.id} className="py-2">
+                <div className="flex items-center">
+                  <img
+                    src="https://via.placeholder.com/40"
+                    alt="Product"
+                    className="rounded mr-4"
+                  />
+                  <div>
+                    <p>{item.name}</p>
+                    <p className="text-sm text-gray-400">{item.name}</p>
+                  </div>
+                </div>
+              </li>
+            ))} */}
             <li className="py-2">
               <div className="flex items-center">
                 <img

@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export const useEyeGlassService = () => {
+export const useDashboardService = () => {
     const baseUrl = process.env.REACT_APP_API_URL;
 
-    const fetchAllEyeGlass = async () => {
-        return axios.get(`${baseUrl}/api/EyeGlass`)
+    const getAllAccount = async () => {
+        return axios.get(`${baseUrl}/api/Account`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -19,8 +19,8 @@ export const useEyeGlassService = () => {
             });
     };
 
-    const fetchEyeGlassById = async (id) => {
-        return axios.get(`${baseUrl}/api/EyeGlass/${id}`)
+    const getAllOrder = async () => {
+        return axios.get(`${baseUrl}/api/Order`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -35,8 +35,8 @@ export const useEyeGlassService = () => {
             });
     };
 
-    const fetchAllEyeGlassTypes = async () => {
-        return axios.get(`${baseUrl}/api/EyeGlassType`)
+    const getAllOrderDetail = async () => {
+        return axios.get(`${baseUrl}/api/OrderDetail`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -51,8 +51,8 @@ export const useEyeGlassService = () => {
             });
     };
 
-    const fetchLensType = async () => {
-        return axios.get(`${baseUrl}/api/LensType`)
+    const getAllPayment = async () => {
+        return axios.get(`${baseUrl}/api/Payment`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -67,8 +67,8 @@ export const useEyeGlassService = () => {
             });
     };
 
-    const getAllLens = async () => {
-        return axios.get(`${baseUrl}/api/Lens`)
+    const getAllProfile = async () => {
+        return axios.get(`${baseUrl}/api/Profile`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -83,5 +83,5 @@ export const useEyeGlassService = () => {
             });
     };
 
-    return { fetchAllEyeGlass, fetchEyeGlassById, fetchAllEyeGlassTypes, fetchLensType, getAllLens };
+    return { getAllAccount, getAllOrder, getAllOrderDetail, getAllPayment, getAllProfile };
 };
