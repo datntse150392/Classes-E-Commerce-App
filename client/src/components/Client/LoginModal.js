@@ -57,7 +57,7 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
                 message: "Payment successfull",
                 status: "success",
                 });
-                navigate(`/`);
+                navigate("/");
             } else {
                 setUsername('');
                 setPassword('');
@@ -68,7 +68,7 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
                 });
                 alert("Payment failed")
                 setDisplayModal(false);
-                navigate(`/`);
+                navigate("/");
             }
         } else {
             setUsername('');
@@ -80,7 +80,7 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
             });
             alert("Payment failed")
             setDisplayModal(false);
-            navigate(`/`);
+            navigate("/");
         }
     };
     

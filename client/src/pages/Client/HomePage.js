@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import ProductCard from "../../components/Client/ProductCard";
+import { SearchContext } from '../../context/SearchContext';
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
@@ -12,11 +13,11 @@ const Homepage = () => {
 
   // Behavior variables
   const [loading, setLoading] = useState(true);
+  const { search } = useContext(SearchContext);
 
   // API variables
   const { fetchAllEyeGlass, fetchAllEyeGlassTypes } = useEyeGlassService();
 
-  // Fetch all eye glass data
   // Fetch all eye glass data and eye glass types
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +55,15 @@ const Homepage = () => {
 
     fetchData();
   }, []);
+
+  // Update the data based on the search value
+  useEffect(() => {
+    const searchValue = search.toLowerCase();
+    const eyeGlassDataTemp = originalData.filter((eyeGlass) => {
+      return eyeGlass.name.toLowerCase().includes(searchValue);
+    });
+    setData(eyeGlassDataTemp);
+  }, [search, originalData]);
 
   if (loading) {
     return <div>Loading...</div>;

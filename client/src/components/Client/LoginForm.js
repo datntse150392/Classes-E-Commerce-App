@@ -21,7 +21,12 @@ const LoginForm = () => {
     if (response) {
       localStorage.setItem("UserInfo", JSON.stringify(response));
       alert("Login successful");
-      navigate("/");
+      // Check if UserInfo.roleID === 2, then navigate to admin
+      if (response.roleID === 2) {
+        navigate("/admin")
+      } else {
+        navigate("/");
+      }
     } else {
       alert("Login failed");
     }

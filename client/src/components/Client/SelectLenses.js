@@ -43,7 +43,7 @@ const SelectLenses = () => {
     const fetchData = async () => {
       try {
         if (!productData) {
-          navigate(`/`);
+          navigate("/");
         } else {
           let initialData = {
             ...productData,
@@ -133,7 +133,7 @@ const SelectLenses = () => {
           message: "Payment successfull",
           status: "success",
         });
-        navigate(`/`);
+        navigate("/");
       } else {
         setBodyDialog({
           header: "Payment",
@@ -142,7 +142,7 @@ const SelectLenses = () => {
         });
         alert("Payment failed")
         setDisplayModal(false);
-        navigate(`/`);
+        navigate("/");
       }
     }
   }

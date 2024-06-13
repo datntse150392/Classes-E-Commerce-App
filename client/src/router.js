@@ -15,6 +15,7 @@ import Orders from "./pages/Admin/OrdersPage";
 import Eyeglasses from "./pages/Admin/EyeglassesPage";
 import Lenses from "./pages/Admin/LensesPage";
 import Users from "./pages/Admin/UsersPage";
+import { SearchProvider } from './context/SearchContext';
 
 const AppRoutes = () => {
   return (
@@ -23,9 +24,11 @@ const AppRoutes = () => {
         <Route
           path="/"
           element={
-            <ClientLayout>
-              <Homepage />
-            </ClientLayout>
+            <SearchProvider>
+              <ClientLayout>
+                <Homepage />
+              </ClientLayout>
+            </SearchProvider>
           }
         />
         <Route path="/login" element={<LoginForm />} />

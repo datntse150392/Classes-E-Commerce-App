@@ -1,19 +1,26 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { SearchContext } from '../../context/SearchContext';
 
 const Header = () => {
+  const { search, setSearch } = useContext(SearchContext);
+  const navigate = useNavigate();
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
     alert("Logged out successfully");
-    window.location.reload();
+    navigate("/");
   };
+
   return (
     <header className="bg-white shadow">
       <div className="container mx-auto flex items-center justify-between p-4">
         <div className="text-2xl font-bold">VisionUp</div>
         <input
           type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           className="border rounded p-2 w-1/2"
           placeholder="Search for products, vouchers, etc."
         />

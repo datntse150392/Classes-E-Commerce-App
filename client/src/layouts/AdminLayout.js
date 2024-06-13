@@ -2,10 +2,19 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Admin/Sidebar";
 import Header from "../components/Admin/Header";
+import { useNavigate } from 'react-router-dom';
 
 const AdminLayout = () => {
-  const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
-  if (!UserInfo) {
+  const navigate = useNavigate();
+  let UserInfo = null;
+
+  try {
+    UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  } catch (error) {
+    console.error("Error parsing user info from localStorage", error);
+  }
+
+  if (!UserInfo || UserInfo.roleID !== 2) {
     window.location.href = "/";
   }
 
