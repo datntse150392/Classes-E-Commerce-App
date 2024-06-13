@@ -171,7 +171,7 @@ const SelectLenses = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="bg-yellow-100 text-center p-6">
+      {/* <div className="bg-yellow-100 text-center p-6">
         <span className="text-lg">
           Up to 35% Off | CODE: MORE4DAD |{" "}
           <a href="#" className="underline">
@@ -182,7 +182,7 @@ const SelectLenses = () => {
             Terms & Conditions
           </a>
         </span>
-      </div>
+      </div> */}
       <div className="flex flex-1 items-start justify-between p-12">
         <div className="flex-1 flex items-center justify-center">
           <div className="max-w-full">
