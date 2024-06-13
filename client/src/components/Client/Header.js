@@ -5,6 +5,7 @@ const Header = () => {
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
+    alert("Logged out successfully");
     window.location.reload();
   };
   return (
