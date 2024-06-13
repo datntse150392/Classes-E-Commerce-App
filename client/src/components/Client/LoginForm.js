@@ -18,8 +18,9 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const response = await login(username, password);
-    if (response !== null && response._statusCode === 200) {
-      localStorage.setItem("UserInfo", JSON.stringify(response._data));
+    if (response) {
+      localStorage.setItem("UserInfo", JSON.stringify(response));
+      alert("Login successful");
       navigate("/");
     } else {
       alert("Login failed");

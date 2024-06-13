@@ -7,8 +7,9 @@ import { useState } from "react";
 import { useAuthService } from "../../services/index";
 
 const SignUpForm = () => {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
 
   // Behavior variables
   const navigate = useNavigate();
@@ -17,13 +18,32 @@ const SignUpForm = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const response = await register(username, password);
-    if (response !== null && response._statusCode === 200) {
-      localStorage.setItem("UserInfo", JSON.stringify(response._data));
+
+    const canSubmit = validateForm();
+    if (!canSubmit) {
+      return;
+    }
+    
+    const response = await register(username, password, email);
+    if (response) {
+      localStorage.setItem("UserInfo", JSON.stringify(response));
+      alert("Register successful");
       navigate("/");
     } else {
       alert("Register failed");
     }
+  }
+
+  function validateForm() {
+    let emailInput = email;
+    let usernameInput = username;
+    let passwordInput = password;
+
+    if (usernameInput.trim() === "" || passwordInput.trim() === "" || emailInput.trim() === "") {
+      alert("Please fill all fields");
+      return false;
+    }
+    return true;
   }
 
   return (
@@ -40,26 +60,11 @@ const SignUpForm = () => {
           <hr className="flex-grow border-gray-300" />
         </div>
         <form className="space-y-6">
-          <div className="flex space-x-4">
-            <div className="relative w-1/2">
-              <input
-                type="text"
-                placeholder="Name"
-                className="w-full py-4 pl-4 pr-4 border rounded-full focus:outline-none focus:ring focus:border-blue-300"
-              />
-            </div>
-            <div className="relative w-1/2">
-              <input
-                type="text"
-                placeholder="Surname"
-                className="w-full py-4 pl-4 pr-4 border rounded-full focus:outline-none focus:ring focus:border-blue-300"
-              />
-            </div>
-          </div>
           <div className="relative">
             <input
+              onChange={(e) => setEmail(e.target.value)}
               type="text"
-              placeholder="Phone Number"
+              placeholder="Email"
               className="w-full py-4 pl-4 pr-4 border rounded-full focus:outline-none focus:ring focus:border-blue-300"
             />
           </div>

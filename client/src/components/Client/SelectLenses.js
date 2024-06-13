@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import LoginModal from "./LoginModal";
+import DialogModal from "./DialogModal";
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
@@ -21,32 +22,15 @@ const SelectLenses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayModal, setDisplayModal] = useState(false);
+  const [displayConfirmModal, setDisplayConfirmModal] = useState(true);
+  const [bodyDialog, setBodyDialog] = useState({
+    header: "",
+    message: "",
+    status: "",
+  });
 
   // API variables
-  const { fetchLensType, getAllLens } = useEyeGlassService();
-
-  // const lenses = [
-  //   {
-  //     id: 1,
-  //     name: "Single Vision (Distance)",
-  //     description: "General use lenses for common prescriptions and seeing things from distance.",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Bifocal & Progressive",
-  //     description: "One pair of glasses corrects vision at near, middle, and far distances.",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Reading",
-  //     description: "Lenses that magnify to assist with reading.",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Non-Prescription",
-  //     description: "Basic lenses with no vision correction.",
-  //   },
-  // ];
+  const { fetchLensType, getAllLens, createOrder } = useEyeGlassService();
 
   const handleLensSelect = (lens) => {
     let updatedData = { ...originalData, lensType: lens.id };
@@ -61,8 +45,19 @@ const SelectLenses = () => {
         if (!productData) {
           navigate(`/`);
         } else {
-          setData(productData);
-          setOriginalData(productData);
+          let initialData = {
+            ...productData,
+            odSphere: 0,
+            odCylinder: 0,
+            odAxis: 0,
+            osSphere: 0,
+            osCylinder: 0,
+            osAxis: 0,
+            pdType: false,
+            address: "",
+          };
+          setData(initialData);
+          setOriginalData(initialData);
           setLoading(false);
         }
   
@@ -107,10 +102,71 @@ const SelectLenses = () => {
     setData(updatedData);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit =  async () => {
+    const canSubmit = validateForm();
+
+    if (canSubmit === false) {
+      return;
+    }
+
     // Check user is logged in, if not login then show dialog
-    if (localStorage)
-    setDisplayModal(true);
+    if (localStorage.getItem("UserInfo") === undefined ||
+    localStorage.getItem("UserInfo") === null ||
+    localStorage.getItem("UserInfo") === "undefined") {
+      setDisplayModal(true);
+    } else {
+      alert("Your total is: $" + data.price +
+        "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
+        " \n 2. odCylinder: " + data.odCylinder +
+        " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
+        " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
+        " \n 7. pdType: " + data.pdType + " \n 8. Address: " + data.address);
+      const [responseCreateOrder] = await Promise.all([createOrder(data)]);
+      if (responseCreateOrder.status !== undefined && responseCreateOrder.status) {
+        alert("Order created successfully \n" +
+          "Details: \n" +
+          "Order code: " + responseCreateOrder.code + "\n" +
+          "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
+          "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
+        setBodyDialog({
+          header: "Payment",
+          message: "Payment successfull",
+          status: "success",
+        });
+        navigate(`/`);
+      } else {
+        setBodyDialog({
+          header: "Payment",
+          message: "Payment failed",
+          status: "error",
+        });
+        alert("Payment failed")
+        setDisplayModal(false);
+        navigate(`/`);
+      }
+    }
+  }
+
+  function validateForm() {
+    let odSphere = data.odSphere;
+    let odCylinder = data.odCylinder;
+    let odAxis = data.odAxis;
+    let osSphere = data.osSphere;
+    let osCylinder = data.osCylinder;
+    let osAxis = data.osAxis;
+    let pdType = data.pdType;
+    let address = data.address.trim();
+    if (odSphere < 0 || odCylinder < 0 || odAxis < 0 || osSphere < 0 || osCylinder < 0 || osAxis < 0) {
+      alert("Invalid data, please check again!");
+      return false;
+    }
+
+    if (address === undefined || address === null || address === "") {
+      alert("Please enter your address!");
+      return false;
+    }
+
+    return true;
   }
 
   return (
@@ -243,12 +299,28 @@ const SelectLenses = () => {
                       type="checkbox" className="mr-2" /> 2 PD numbers
                   </label>
                 </div>
+                <div>
+                  <label
+                    htmlFor="address"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    Your address
+                  </label>
+                  <input
+                    onChange={(e) => handleChangeValue(e, "address")}
+                    type="text"
+                    name="address"
+                    id="address"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    required
+                  />
+                </div>
               </div>
               <div className="mt-6 flex justify-end">
                 <button onClick={() => handleSubmit()} className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition">
                   Save & Continue
                 </button>
-                <LoginModal toggle={displayModal} setDisplayModal={setDisplayModal}/>
+                <LoginModal toggle={displayModal} setDisplayModal={setDisplayModal} setBodyDialog={setBodyDialog} data={data}/>
               </div>
             </div>
           )}
@@ -256,7 +328,7 @@ const SelectLenses = () => {
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg w-full flex justify-between items-center">
         <span className="text-lg text-gray-600">
-          Subtotal: <del>$39</del> <span className="text-yellow-500">$28</span>
+          Subtotal: <del>${data.price + 100}</del> <span className="text-yellow-500">${data.price}</span>
         </span>
         <span className="text-lg text-gray-600">
           or 4 interest-free payments of $7.00 with{" "}

@@ -2,6 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Header = () => {
+  const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  const handleLogout = () => {
+    localStorage.removeItem("UserInfo");
+    window.location.reload();
+  };
   return (
     <header className="bg-white shadow">
       <div className="container mx-auto flex items-center justify-between p-4">
@@ -12,12 +17,23 @@ const Header = () => {
           placeholder="Search for products, vouchers, etc."
         />
         <div>
-          <Link to="/login" className="mr-4">
-            Log In
-          </Link>
-          <button className="bg-teal-500 text-white p-2 rounded">
-            Sign Up
-          </button>
+        {UserInfo ? (
+            <span className="flex items-center justify-between">
+              <div className="text-lg font-bold mr-4">Welcome, {UserInfo.username}</div>
+              <button onClick={() => handleLogout()} className="bg-teal-500 text-white p-2 rounded">
+                Log Out
+              </button>
+            </span>
+        ) : (
+              <>
+                <Link to="/login" className="mr-4">
+                  Log In
+                </Link>
+                <button className="bg-teal-500 text-white p-2 rounded">
+                  Sign Up
+                </button>
+              </>
+        )}
         </div>
       </div>
     </header>
