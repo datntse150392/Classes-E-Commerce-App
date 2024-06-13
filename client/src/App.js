@@ -1,11 +1,14 @@
 import React from "react";
 import AppRoutes from "./router";
+import { SearchProvider } from "./context/SearchContext";
 
 function App() {
   return (
-    <div className="App">
-      <AppRoutes />
-    </div>
+    <SearchProvider>
+      <div className="App">
+        <AppRoutes />
+      </div>
+    </SearchProvider>
   );
 }
 

@@ -1,16 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import { SearchContext } from '../../context/SearchContext';
 
-const Header = () => {
-  const { search, setSearch } = useContext(SearchContext);
+const Header = ({ search, setSearch }) => {
   const navigate = useNavigate();
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
     alert("Logged out successfully");
     navigate("/");
+  };
+
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
   };
 
   return (
@@ -20,7 +22,7 @@ const Header = () => {
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           className="border rounded p-2 w-1/2"
           placeholder="Search for products, vouchers, etc."
         />
