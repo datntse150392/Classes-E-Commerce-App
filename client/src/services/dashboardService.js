@@ -4,7 +4,7 @@ export const useDashboardService = () => {
     const baseUrl = process.env.REACT_APP_API_URL;
 
     const getAllAccount = async () => {
-        return axios.get(`${baseUrl}/api/Account`)
+        return axios.get(`${baseUrl}/api/Account?PageSize=1000`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -20,7 +20,7 @@ export const useDashboardService = () => {
     };
 
     const getAllOrder = async () => {
-        return axios.get(`${baseUrl}/api/Order`)
+        return axios.get(`${baseUrl}/api/Order?PageSize=1000`)
             .then(response => {
                 if (response.data) {
                     return response.data;
@@ -83,5 +83,21 @@ export const useDashboardService = () => {
             });
     };
 
-    return { getAllAccount, getAllOrder, getAllOrderDetail, getAllPayment, getAllProfile };
+    const getAllOrderPageSize1000 = async () => {
+        return axios.get(`${baseUrl}/api/Order?PageSize=1000`)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    console.log('No item found in response');
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                return null;
+            });
+    };
+
+    return { getAllAccount, getAllOrder, getAllOrderDetail, getAllPayment, getAllProfile, getAllOrderPageSize1000 };
 };

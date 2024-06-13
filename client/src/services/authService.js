@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const useAuthService = () => {
-    const baseUrl = "http://visionup.somee.com";
+    const baseUrl = process.env.REACT_APP_API_URL;
 
     // Login
     const login = async (username, password) => {
@@ -21,8 +21,8 @@ export const useAuthService = () => {
     };
 
     // Register
-    const register = async (username, password) => {
-        return axios.post(`${baseUrl}/api/Account/Register`, { username, password })
+    const register = async (username, password, email) => {
+        return axios.post(`${baseUrl}/api/Account/Register`, { username, password, email })
             .then(response => {
                 if (response.data) {
                     return response.data;

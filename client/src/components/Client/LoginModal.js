@@ -1,8 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthService, useEyeGlassService } from '../../services';
 
-const LoginModal = ({ toggle, setDisplayModal }) => {
+const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
     const navigate = useNavigate();
+    const [username, setUsername] = useState();
+    const [password, setPassword] = useState();
+
+    // Behavior variables
+  const [loading, setLoading] = useState(true);
+
+  // API variables
+  const { login, register } = useAuthService();
+  const { createOrder } = useEyeGlassService();
+
 
     const handleModalToggle = () => {
         const modal = document.getElementById('authentication-modal');
@@ -15,28 +26,66 @@ const LoginModal = ({ toggle, setDisplayModal }) => {
     };
 
     useEffect(() => {
+        console.log('Toggle: ', toggle);
         handleModalToggle();
     }, [toggle]);
 
-    const handleLoginFormSubmit = (e) => {
+    const handleLoginFormSubmit = async (e) => {
         e.preventDefault();
         // Perform login logic here
         // Example: navigate to dashboard after successful login
-        navigate('/dashboard');
+        const response = await login(username, password);
+        if (response) {
+            localStorage.setItem("UserInfo", JSON.stringify(response));
+            setUsername('');
+            setPassword('');
+            alert("Your total is: $" + data.price +
+                "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
+                " \n 2. odCylinder: " + data.odCylinder +
+                " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
+                " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
+                " \n 7. pdType: " + data.pdType + " \n 8. address: " + data.address);
+            const [responseCreateOrder] = await Promise.all([createOrder(data)]);
+            if (responseCreateOrder.status !== undefined && responseCreateOrder.status) {
+                alert("Order created successfully \n" +
+                "Details: \n" +
+                "Order code: " + responseCreateOrder.code + "\n" +
+                "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
+                "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
+                setBodyDialog({
+                header: "Payment",
+                message: "Payment successfull",
+                status: "success",
+                });
+                navigate(`/`);
+            } else {
+                setUsername('');
+                setPassword('');
+                setBodyDialog({
+                    header: "Payment",
+                    message: "Payment failed",
+                    status: "error",
+                });
+                alert("Payment failed")
+                setDisplayModal(false);
+                navigate(`/`);
+            }
+        } else {
+            setUsername('');
+            setPassword('');
+            setBodyDialog({
+                header: 'Payment',
+                body: 'Payment failed',
+                status: 'error',
+            });
+            alert("Payment failed")
+            setDisplayModal(false);
+            navigate(`/`);
+        }
     };
     
     return (
         <>
-            {/* <button
-                data-modal-target="authentication-modal"
-                data-modal-toggle="authentication-modal"
-                className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                type="button"
-                onClick={handleModalToggle}
-            >
-                Toggle modal
-            </button> */}
-
             <div
                 id="authentication-modal"
                 tabIndex="-1"
@@ -83,6 +132,7 @@ const LoginModal = ({ toggle, setDisplayModal }) => {
                                         Your username
                                     </label>
                                     <input
+                                        onChange={(e) => setUsername(e.target.value)}
                                         type="text"
                                         name="username"
                                         id="username"
@@ -98,31 +148,13 @@ const LoginModal = ({ toggle, setDisplayModal }) => {
                                         Your password
                                     </label>
                                     <input
+                                        onChange={(e) => setPassword(e.target.value)}
                                         type="password"
                                         name="password"
                                         id="password"
                                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                         required
                                     />
-                                </div>
-                                <div className="flex justify-between">
-                                    <div className="flex items-start">
-                                        <div className="flex items-center h-5">
-                                            <input
-                                                id="remember"
-                                                type="checkbox"
-                                                value=""
-                                                className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-                                                required
-                                            />
-                                        </div>
-                                        <label
-                                            htmlFor="remember"
-                                            className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                        >
-                                            Remember me
-                                        </label>
-                                    </div>
                                 </div>
                                 <button
                                     type="submit"

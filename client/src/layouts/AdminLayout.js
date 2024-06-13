@@ -4,6 +4,11 @@ import Sidebar from "../components/Admin/Sidebar";
 import Header from "../components/Admin/Header";
 
 const AdminLayout = () => {
+  const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  if (!UserInfo) {
+    window.location.href = "/";
+  }
+
   return (
     <div className="flex">
       <Sidebar />
