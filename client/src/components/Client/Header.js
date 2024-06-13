@@ -30,9 +30,11 @@ const Header = () => {
                 <Link to="/login" className="mr-4">
                   Log In
                 </Link>
-                <button className="bg-teal-500 text-white p-2 rounded">
-                  Sign Up
-                </button>
+                <Link to="/signup" className="text-blue-500 hover:text-blue-700">
+                  <button className="bg-teal-500 text-white p-2 rounded">
+                    Sign Up
+                  </button>
+                </Link>
               </>
         )}
         </div>
