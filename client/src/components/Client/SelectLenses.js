@@ -60,27 +60,27 @@ const SelectLenses = () => {
           setOriginalData(initialData);
           setLoading(false);
         }
-  
+
         const [lensData, lensTypes] = await Promise.all([
           getAllLens(),
-          fetchLensType()
+          fetchLensType(),
         ]);
-  
+
         if (lensData !== null && lensData.length > 0) {
           setLensData(lensData);
           setLoading(false);
         }
-  
+
         if (lensTypes !== null && lensTypes.length > 0) {
           setLensTypes(lensTypes);
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setError(error);
       }
     };
-  
+
     fetchData();
   }, [productData, id, navigate]);
 
@@ -102,7 +102,7 @@ const SelectLenses = () => {
     setData(updatedData);
   };
 
-  const handleSubmit =  async () => {
+  const handleSubmit = async () => {
     const canSubmit = validateForm();
 
     if (canSubmit === false) {
@@ -110,24 +110,51 @@ const SelectLenses = () => {
     }
 
     // Check user is logged in, if not login then show dialog
-    if (localStorage.getItem("UserInfo") === undefined ||
-    localStorage.getItem("UserInfo") === null ||
-    localStorage.getItem("UserInfo") === "undefined") {
+    if (
+      localStorage.getItem("UserInfo") === undefined ||
+      localStorage.getItem("UserInfo") === null ||
+      localStorage.getItem("UserInfo") === "undefined"
+    ) {
       setDisplayModal(true);
     } else {
-      alert("Your total is: $" + data.price +
-        "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
-        " \n 2. odCylinder: " + data.odCylinder +
-        " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
-        " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
-        " \n 7. pdType: " + data.pdType + " \n 8. Address: " + data.address);
+      alert(
+        "Your total is: $" +
+          data.price +
+          "\n Your prescription is: \n 1. odSphere: " +
+          data.odSphere +
+          " \n 2. odCylinder: " +
+          data.odCylinder +
+          " \n 3. odAxis: " +
+          data.odAxis +
+          " \n 4. osSphere: " +
+          data.osSphere +
+          " \n 5. osCylinder: " +
+          data.osCylinder +
+          " \n 6. osAxis: " +
+          data.osAxis +
+          " \n 7. pdType: " +
+          data.pdType +
+          " \n 8. Address: " +
+          data.address
+      );
       const [responseCreateOrder] = await Promise.all([createOrder(data)]);
-      if (responseCreateOrder.status !== undefined && responseCreateOrder.status) {
-        alert("Order created successfully \n" +
-          "Details: \n" +
-          "Order code: " + responseCreateOrder.code + "\n" +
-          "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
-          "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
+      if (
+        responseCreateOrder.status !== undefined &&
+        responseCreateOrder.status
+      ) {
+        alert(
+          "Order created successfully \n" +
+            "Details: \n" +
+            "Order code: " +
+            responseCreateOrder.code +
+            "\n" +
+            "Order sender address: " +
+            responseCreateOrder.senderAddress +
+            "\n" +
+            "Order receiver address: " +
+            responseCreateOrder.receiverAddress +
+            "\n"
+        );
         setBodyDialog({
           header: "Payment",
           message: "Payment successfull",
@@ -140,12 +167,12 @@ const SelectLenses = () => {
           message: "Payment failed",
           status: "error",
         });
-        alert("Payment failed")
+        alert("Payment failed");
         setDisplayModal(false);
         navigate("/");
       }
     }
-  }
+  };
 
   function validateForm() {
     let odSphere = data.odSphere;
@@ -156,7 +183,14 @@ const SelectLenses = () => {
     let osAxis = data.osAxis;
     let pdType = data.pdType;
     let address = data.address.trim();
-    if (odSphere < 0 || odCylinder < 0 || odAxis < 0 || osSphere < 0 || osCylinder < 0 || osAxis < 0) {
+    if (
+      odSphere < 0 ||
+      odCylinder < 0 ||
+      odAxis < 0 ||
+      osSphere < 0 ||
+      osCylinder < 0 ||
+      osAxis < 0
+    ) {
       alert("Invalid data, please check again!");
       return false;
     }
@@ -200,7 +234,10 @@ const SelectLenses = () => {
         <div className="flex-1 bg-white shadow-lg rounded-lg p-8 mx-6 max-w-full w-full">
           {step === 1 && (
             <div className="lens-selection">
-              <button onClick={() => navigate(`/product/${id}`)} className="text-lg text-gray-600 mb-6">
+              <button
+                onClick={() => navigate(`/product/${id}`)}
+                className="text-lg text-gray-600 mb-6"
+              >
                 Back to {data.name}
               </button>
               <h2 className="text-2xl font-bold mb-6">Choose your usage</h2>
@@ -220,7 +257,9 @@ const SelectLenses = () => {
                     }`}
                     onClick={() => handleLensSelect(lens)}
                   >
-                    <h3 className="text-xl font-semibold">{lens.description}</h3>
+                    <h3 className="text-xl font-semibold">
+                      {lens.description}
+                    </h3>
                   </div>
                 ))}
               </div>
@@ -296,7 +335,10 @@ const SelectLenses = () => {
                   <label className="flex items-center col-span-3 text-lg">
                     <input
                       onChange={(e) => handleChangeValue(e, "pdType")}
-                      type="checkbox" className="mr-2" /> 2 PD numbers
+                      type="checkbox"
+                      className="mr-2"
+                    />{" "}
+                    2 PD numbers
                   </label>
                 </div>
                 <div>
@@ -317,10 +359,18 @@ const SelectLenses = () => {
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
-                <button onClick={() => handleSubmit()} className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition">
+                <button
+                  onClick={() => handleSubmit()}
+                  className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition"
+                >
                   Save & Continue
                 </button>
-                <LoginModal toggle={displayModal} setDisplayModal={setDisplayModal} setBodyDialog={setBodyDialog} data={data}/>
+                <LoginModal
+                  toggle={displayModal}
+                  setDisplayModal={setDisplayModal}
+                  setBodyDialog={setBodyDialog}
+                  data={data}
+                />
               </div>
             </div>
           )}
@@ -328,7 +378,8 @@ const SelectLenses = () => {
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg w-full flex justify-between items-center">
         <span className="text-lg text-gray-600">
-          Subtotal: <del>${data.price + 100}</del> <span className="text-yellow-500">${data.price}</span>
+          Subtotal: <del>${data.price + 100}</del>{" "}
+          <span className="text-yellow-500">${data.price}</span>
         </span>
         <span className="text-lg text-gray-600">
           or 4 interest-free payments of $7.00 with{" "}

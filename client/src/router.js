@@ -15,6 +15,7 @@ import Orders from "./pages/Admin/OrdersPage";
 import Eyeglasses from "./pages/Admin/EyeglassesPage";
 import Lenses from "./pages/Admin/LensesPage";
 import Users from "./pages/Admin/UsersPage";
+import OrderConfirmation from "./components/Client/OrderConfirmation";
 
 const AppRoutes = () => {
   return (
@@ -23,9 +24,9 @@ const AppRoutes = () => {
         <Route
           path="/"
           element={
-              <ClientLayout>
-                <Homepage />
-              </ClientLayout>
+            <ClientLayout>
+              <Homepage />
+            </ClientLayout>
           }
         />
         <Route path="/login" element={<LoginForm />} />
@@ -60,6 +61,14 @@ const AppRoutes = () => {
           element={
             <ClientLayout>
               <PaymentStep />
+            </ClientLayout>
+          }
+        />
+        <Route
+          path="/order-confirm"
+          element={
+            <ClientLayout>
+              <OrderConfirmation />
             </ClientLayout>
           }
         />

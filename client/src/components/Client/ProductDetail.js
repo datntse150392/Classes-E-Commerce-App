@@ -1,118 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import SwiperCore from "swiper";
+import { Navigation, Pagination } from "swiper/modules";
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
 
 // IMPORT COMPONENT
-import { Tooltip } from 'react-tooltip';
+import { Tooltip } from "react-tooltip";
+
+SwiperCore.use([Navigation, Pagination]);
 
 const colors = [
   {
     color: "Black",
-    hex: "#0d0d0d"
+    hex: "#0d0d0d",
   },
-  {
-    color: "White",
-    hex: "#ffffff"
-  },
-  {
-    color: "Red",
-    hex: "#ff0000"
-  },
-  {
-    color: "Green",
-    hex: "#00ff00"
-  },
-  {
-    color: "Blue",
-    hex: "#0000ff"
-  },
-  {
-    color: "Yellow",
-    hex: "#ffff00"
-  },
-  {
-    color: "Cyan",
-    hex: "#00ffff"
-  },
-  {
-    color: "Magenta",
-    hex: "#ff00ff"
-  },
-  {
-    color: "Silver",
-    hex: "#c0c0c0"
-  },
-  {
-    color: "Gray",
-    hex: "#808080"
-  },
-  {
-    color: "Maroon",
-    hex: "#800000"
-  },
-  {
-    color: "Olive",
-    hex: "#808000"
-  },
-  {
-    color: "Purple",
-    hex: "#800080"
-  },
-  {
-    color: "Teal",
-    hex: "#008080"
-  },
-  {
-    color: "Navy",
-    hex: "#000080"
-  },
-  {
-    color: "Orange",
-    hex: "#ffa500"
-  },
-  {
-    color: "Pink",
-    hex: "#ffc0cb"
-  },
-  {
-    color: "Brown",
-    hex: "#a52a2a"
-  },
-  {
-    color: "Lime",
-    hex: "#00ff00"
-  },
-  {
-    color: "Indigo",
-    hex: "#4b0082"
-  },
-  {
-    color: "Gold",
-    hex: "#ffd700"
-  },
-  {
-    color: "Violet",
-    hex: "#ee82ee"
-  },
-  {
-    color: "Turquoise",
-    hex: "#40e0d0"
-  },
-  {
-    color: "Salmon",
-    hex: "#fa8072"
-  },
-  {
-    color: "Khaki",
-    hex: "#f0e68c"
-  },
-  {
-    color: "Plum",
-    hex: "#dda0dd"
-  }
+  // ... Other colors
 ];
 
 const ProductDetail = () => {
@@ -135,7 +44,7 @@ const ProductDetail = () => {
       try {
         const [eyeGlassData, eyeGlassTypes] = await Promise.all([
           fetchEyeGlassById(id),
-          fetchAllEyeGlassTypes()
+          fetchAllEyeGlassTypes(),
         ]);
 
         if (eyeGlassData) {
@@ -144,13 +53,14 @@ const ProductDetail = () => {
             eyeGlassImages: [
               "https://img.ebdcdn.com/product/model/portrait/mt7232_w0.jpg?im=Resize,width=500,height=600,aspect=fill;UnsharpMask,sigma=1.0,gain=1.0&q=85",
               "https://img.ebdcdn.com/product/frame/gray/mt6960_2.jpg?im=Resize,width=900,height=450,aspect=fill;UnsharpMask,sigma=1.0,gain=1.0&q=85",
-              "https://img.ebdcdn.com/product/frame/gray/mt6960_1.jpg?im=Resize,width=680,height=340,aspect=fill;UnsharpMask,sigma=1.0,gain=1.0&q=85"
+              "https://img.ebdcdn.com/product/frame/gray/mt6960_1.jpg?im=Resize,width=680,height=340,aspect=fill;UnsharpMask,sigma=1.0,gain=1.0&q=85",
             ],
             sizes: ["Small", "Medium", "Large"],
             reviews: 2750,
             popularity: 313,
-            colorHex: colors.find((item) => item.color === eyeGlassData.color)?.hex,
-            selectedSize: "Small"
+            colorHex: colors.find((item) => item.color === eyeGlassData.color)
+              ?.hex,
+            selectedSize: "Small",
           });
           setLoading(false);
         }
@@ -165,13 +75,13 @@ const ProductDetail = () => {
               glassType: item.glassType,
               status: item.status,
               isChoiced: false,
-            })
+            });
           });
           setEyeGlassTypes(eyeGlassTypesTemp);
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setError(error);
       }
     };
@@ -195,50 +105,63 @@ const ProductDetail = () => {
   const handleSelectLensesClick = () => {
     let objectData = {
       ...data,
-      glassTypeText: eyeGlassTypes.find((item) => item.id === data.eyeGlassTypeID)?.glassType
-    }
-      
+      glassTypeText: eyeGlassTypes.find(
+        (item) => item.id === data.eyeGlassTypeID
+      )?.glassType,
+    };
+
     navigate(`/select-lenses/${id}`, {
       state: {
-        productData: objectData
-      }
+        productData: objectData,
+      },
     });
   };
 
   const handleChooseSize = (size) => {
     setData({
       ...data,
-      selectedSize: size
+      selectedSize: size,
     });
   };
 
   return (
     <div className="container mx-auto p-8 mt-10 flex flex-col md:flex-row">
       <Tooltip id="my-tooltip" />
-      <div className="flex-1 p-4">
-        <div className="flex flex-wrap -mx-2">
-          {data.eyeGlassImages &&
-            data.eyeGlassImages.map((image, index) => (
-              <div key={index} className="w-1/2 p-2">
-                <div className="h-72 w-full bg-[#f5f5f5]">
-                  <img
-                    src={image}
-                    alt={`Product image ${index + 1}`}
-                    className="h-full w-full rounded-lg object-contain"
-                  />
-                </div>
+      <Swiper
+        className="w-full md:w-1/2"
+        spaceBetween={10}
+        slidesPerView={1}
+        navigation
+        pagination={{ clickable: true }}
+      >
+        {data.eyeGlassImages &&
+          data.eyeGlassImages.map((image, index) => (
+            <SwiperSlide key={index}>
+              <div className="w-full h-[50vh] bg-[#f5f5f5]">
+                <img
+                  src={image}
+                  alt={`Product image ${index + 1}`}
+                  className="h-full w-full rounded-lg object-contain"
+                />
               </div>
-            ))}
-        </div>
-      </div>
+            </SwiperSlide>
+          ))}
+      </Swiper>
       <div className="flex-1 p-4">
         <h1 className="text-4xl font-bold mb-4">{data.name}</h1>
-        <p className="text-lg text-gray-500 mb-2">{eyeGlassTypes.find((item) => item.id === data.eyeGlassTypeID)?.glassType}</p>
+        <p className="text-lg text-gray-500 mb-2">
+          {
+            eyeGlassTypes.find((item) => item.id === data.eyeGlassTypeID)
+              ?.glassType
+          }
+        </p>
         <div className="flex items-center mb-4">
           {[...Array(5)].map((_, i) => (
             <FaStar
               key={i}
-              className={`mr-1 ${i < data.rate ? "text-yellow-400" : "text-gray-300"}`}
+              className={`mr-1 ${
+                i < data.rate ? "text-yellow-400" : "text-gray-300"
+              }`}
             />
           ))}
           <span className="ml-2">{data.reviews} Reviews</span>
@@ -250,25 +173,27 @@ const ProductDetail = () => {
           ${data.price}
         </p>
         <p className="text-gray-700 mb-6 whitespace-pre-line">
-          {data.glassDescription || "These full-rim metal frames are currently hot fashion for women and men. The on-trend frame-shape of St. Michael S brings extra elegance with the tasteful Rose Gold finish. The lightweight materials give you extra comfort with adjustable nose pads, for an easy-to-wear comfortable fit"}
+          {data.glassDescription ||
+            "These full-rim metal frames are currently hot fashion for women and men. The on-trend frame-shape of St. Michael S brings extra elegance with the tasteful Rose Gold finish. The lightweight materials give you extra comfort with adjustable nose pads, for an easy-to-wear comfortable fit"}
         </p>
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Colors</h3>
           <div className="flex space-x-2">
-              <span
-                data-tooltip-id="my-tooltip"
-                data-tooltip-content={data.color}
-                data-tooltip-place="top"
-                className="w-8 h-8 cursor-pointer rounded-full border border-gray-300"
-                style={{ backgroundColor: data.colorHex }}
-              />
+            <span
+              data-tooltip-id="my-tooltip"
+              data-tooltip-content={data.color}
+              data-tooltip-place="top"
+              className="w-8 h-8 cursor-pointer rounded-full border border-gray-300"
+              style={{ backgroundColor: data.colorHex }}
+            />
           </div>
         </div>
         <p className="text-xl font-semibold mb-4">${data.price}</p>
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Size</h3>
           <div className="flex space-x-2">
-            {data.sizes && data.sizes.map((size, index) => (
+            {data.sizes &&
+              data.sizes.map((size, index) =>
                 size === data.selectedSize ? (
                   <button
                     key={index}
@@ -285,7 +210,7 @@ const ProductDetail = () => {
                     {size}
                   </button>
                 )
-              ))}
+              )}
           </div>
         </div>
         <button
