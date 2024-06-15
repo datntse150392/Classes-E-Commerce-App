@@ -1,15 +1,23 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import ProductCard from "../../components/Client/ProductCard";
 import { SearchContext } from '../../context/SearchContext';
+import { useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useToast } from "../../context/ToastContext";
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
 
 const Homepage = () => {
   // Data variables
+  const location = useLocation();
   const [originalData, setOriginalData] = useState([]);
   const [data, setData] = useState([]);
   const [eyeGlassTypes, setEyeGlassTypes] = useState([]);
+  // const { toast: toastMessage } = location.state || {}; // Access the passed state
+  const { setToastMessage } = useToast();
+  const [toastMessage, setToastMessageState] = useState(location.state?.toast || {});
 
   // Behavior variables
   const [loading, setLoading] = useState(true);
@@ -55,6 +63,17 @@ const Homepage = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const handleToast = (toastMessage) => {
+      if (toastMessage) {
+        if (toastMessage.type === "success" || toastMessage.type === "error") {
+          setToastMessage(toastMessage);
+        }
+      }
+    };
+    handleToast(toastMessage);
+  }, [toastMessage, setToastMessage, location.pathname]);
 
   // Update the data based on the search value
   useEffect(() => {

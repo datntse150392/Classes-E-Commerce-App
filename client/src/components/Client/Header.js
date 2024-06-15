@@ -1,13 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import { useToast } from "../../context/ToastContext";
 
 const Header = ({ search, setSearch }) => {
   const navigate = useNavigate();
+  const { setToastMessage } = useToast();
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
-    alert("Logged out successfully");
+    setToastMessage({
+      type: "success",
+      message: "Logged out successfully",
+    });
     navigate("/");
   };
 

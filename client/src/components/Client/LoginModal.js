@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthService, useEyeGlassService } from '../../services';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useToast } from "../../context/ToastContext";
+
 
 const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
     const navigate = useNavigate();
+    const { setToastMessage } = useToast();
     const [username, setUsername] = useState();
     const [password, setPassword] = useState();
 
@@ -26,7 +31,6 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
     };
 
     useEffect(() => {
-        console.log('Toggle: ', toggle);
         handleModalToggle();
     }, [toggle]);
 
@@ -39,36 +43,36 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
             localStorage.setItem("UserInfo", JSON.stringify(response));
             setUsername('');
             setPassword('');
-            alert("Your total is: $" + data.price +
-                "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
-                " \n 2. odCylinder: " + data.odCylinder +
-                " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
-                " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
-                " \n 7. pdType: " + data.pdType + " \n 8. address: " + data.address);
+            navigate("/order-confirm", {
+                state: { data: data }
+            });
+            // alert("Your total is: $" + data.price +
+            //     "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
+            //     " \n 2. odCylinder: " + data.odCylinder +
+            //     " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
+            //     " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
+            //     " \n 7. pdType: " + data.pdType + " \n 8. address: " + data.address);
             const [responseCreateOrder] = await Promise.all([createOrder(data)]);
             if (responseCreateOrder.status !== undefined && responseCreateOrder.status) {
-                alert("Order created successfully \n" +
-                "Details: \n" +
-                "Order code: " + responseCreateOrder.code + "\n" +
-                "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
-                "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
-                setBodyDialog({
-                header: "Payment",
-                message: "Payment successfull",
-                status: "success",
-                });
-                navigate("/");
+                // alert("Order created successfully \n" +
+                // "Details: \n" +
+                // "Order code: " + responseCreateOrder.code + "\n" +
+                // "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
+                // "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
+                toast.success("Order created successfully");
+                setTimeout(() => {
+                    navigate("/order-confirm", {
+                        state: { data: data, orderData: responseCreateOrder }
+                      })
+                }, 1000);
             } else {
                 setUsername('');
                 setPassword('');
-                setBodyDialog({
-                    header: "Payment",
-                    message: "Payment failed",
-                    status: "error",
-                });
-                alert("Payment failed")
                 setDisplayModal(false);
-                navigate("/");
+                toast.error("Order failed");
+                setTimeout(() => {
+                    navigate("/");
+                }, 1000);
             }
         } else {
             setUsername('');
@@ -78,14 +82,17 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
                 body: 'Payment failed',
                 status: 'error',
             });
-            alert("Payment failed")
             setDisplayModal(false);
-            navigate("/");
+            toast.error("Order failed");
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
         }
     };
     
     return (
         <>
+            <ToastContainer />
             <div
                 id="authentication-modal"
                 tabIndex="-1"

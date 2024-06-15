@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const OrderConfirmation = () => {
   const [confirmed, setConfirmed] = useState(false);
+  const location = useLocation();
+  const { data, orderData } = location.state || {}; // Access the passed state
 
   const order = {
     items: [
@@ -27,6 +30,11 @@ const OrderConfirmation = () => {
     toast.success("Order confirmed successfully!");
     // Thực hiện các hành động khác như gửi dữ liệu đơn hàng đến server
   };
+
+  useEffect(() => {
+    console.log("DATA: ", data);
+    console.log("ORDER DATA: ", orderData);
+  }, [data, orderData]);
 
   return (
     <div className="container mx-auto p-4">

@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import LoginModal from "./LoginModal";
 import DialogModal from "./DialogModal";
+import { useToast } from "../../context/ToastContext";
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SelectLenses = () => {
+  const { setToastMessage } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -104,7 +108,6 @@ const SelectLenses = () => {
 
   const handleSubmit = async () => {
     const canSubmit = validateForm();
-
     if (canSubmit === false) {
       return;
     }
@@ -117,59 +120,51 @@ const SelectLenses = () => {
     ) {
       setDisplayModal(true);
     } else {
-      alert(
-        "Your total is: $" +
-          data.price +
-          "\n Your prescription is: \n 1. odSphere: " +
-          data.odSphere +
-          " \n 2. odCylinder: " +
-          data.odCylinder +
-          " \n 3. odAxis: " +
-          data.odAxis +
-          " \n 4. osSphere: " +
-          data.osSphere +
-          " \n 5. osCylinder: " +
-          data.osCylinder +
-          " \n 6. osAxis: " +
-          data.osAxis +
-          " \n 7. pdType: " +
-          data.pdType +
-          " \n 8. Address: " +
-          data.address
-      );
+      // alert(
+      //   "Your total is: $" +
+      //     data.price +
+      //     "\n Your prescription is: \n 1. odSphere: " +
+      //     data.odSphere +
+      //     " \n 2. odCylinder: " +
+      //     data.odCylinder +
+      //     " \n 3. odAxis: " +
+      //     data.odAxis +
+      //     " \n 4. osSphere: " +
+      //     data.osSphere +
+      //     " \n 5. osCylinder: " +
+      //     data.osCylinder +
+      //     " \n 6. osAxis: " +
+      //     data.osAxis +
+      //     " \n 7. pdType: " +
+      //     data.pdType +
+      //     " \n 8. Address: " +
+      //     data.address
+      // );
       const [responseCreateOrder] = await Promise.all([createOrder(data)]);
       if (
         responseCreateOrder.status !== undefined &&
         responseCreateOrder.status
       ) {
-        alert(
-          "Order created successfully \n" +
-            "Details: \n" +
-            "Order code: " +
-            responseCreateOrder.code +
-            "\n" +
-            "Order sender address: " +
-            responseCreateOrder.senderAddress +
-            "\n" +
-            "Order receiver address: " +
-            responseCreateOrder.receiverAddress +
-            "\n"
-        );
-        setBodyDialog({
-          header: "Payment",
-          message: "Payment successfull",
-          status: "success",
-        });
-        navigate("/");
+        // alert(
+        //   "Order created successfully \n" +
+        //     "Details: \n" +
+        //     "Order code: " +
+        //     responseCreateOrder.code +
+        //     "\n" +
+        //     "Order sender address: " +
+        //     responseCreateOrder.senderAddress +
+        //     "\n" +
+        //     "Order receiver address: " +
+        //     responseCreateOrder.receiverAddress +
+        //     "\n"
+        // );
+        toast.success("Order successful");
+        navigate("/order-confirm", {
+          state: { data: data, orderData: responseCreateOrder }
+        })
       } else {
-        setBodyDialog({
-          header: "Payment",
-          message: "Payment failed",
-          status: "error",
-        });
-        alert("Payment failed");
         setDisplayModal(false);
-        navigate("/");
+        toast.error("Order failed");
       }
     }
   };
@@ -191,12 +186,12 @@ const SelectLenses = () => {
       osCylinder < 0 ||
       osAxis < 0
     ) {
-      alert("Invalid data, please check again!");
+      toast.error("Invalid data, please check again!");
       return false;
     }
 
     if (address === undefined || address === null || address === "") {
-      alert("Please enter your address!");
+      toast.error("Please enter your address!");
       return false;
     }
 
@@ -205,6 +200,7 @@ const SelectLenses = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <ToastContainer />
       {/* <div className="bg-yellow-100 text-center p-6">
         <span className="text-lg">
           Up to 35% Off | CODE: MORE4DAD |{" "}

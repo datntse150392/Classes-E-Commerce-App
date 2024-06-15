@@ -2,11 +2,15 @@ import React from "react";
 import { FaGoogle, FaApple, FaUser, FaLock } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useToast } from "../../context/ToastContext";
 
 // IMPORT API SERVICES
 import { useAuthService } from "../../services/index";
 
 const LoginForm = () => {
+  const { setToastMessage } = useToast();
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
 
@@ -20,20 +24,28 @@ const LoginForm = () => {
     const response = await login(username, password);
     if (response) {
       localStorage.setItem("UserInfo", JSON.stringify(response));
-      alert("Login successful");
       // Check if UserInfo.roleID === 2, then navigate to admin
       if (response.roleID === 2) {
-        navigate("/admin")
+        toast.success("Login successful");
+        setTimeout(() => {
+          navigate("/admin");
+        }, 1000);
+        clearTimeout();
       } else {
-        navigate("/");
+        toast.success("Login successful");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+        clearTimeout();
       }
     } else {
-      alert("Login failed");
+      toast.error("Login failed");
     }
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <ToastContainer />
       <div className="bg-white p-10 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-3xl font-bold text-center mb-4">
           Login to your account

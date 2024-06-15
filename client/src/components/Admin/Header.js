@@ -6,8 +6,14 @@ const Header = () => {
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
-    alert("Logged out successfully");
-    navigate("/");
+    navigate("/", {
+      state: {
+        toast: {
+          type: "success",
+          message: "Logged out successfully"
+        },
+      },
+    });
   };
 
   return (

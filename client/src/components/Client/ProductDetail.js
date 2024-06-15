@@ -125,7 +125,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="container mx-auto p-8 mt-10 flex flex-col md:flex-row">
+    <div className="w-4/5 container p-8 mt-10 flex flex-col md:flex-row">
       <Tooltip id="my-tooltip" />
       <Swiper
         className="w-full md:w-1/2"
@@ -147,7 +147,7 @@ const ProductDetail = () => {
             </SwiperSlide>
           ))}
       </Swiper>
-      <div className="flex-1 p-4">
+      <div className="flex-1 ml-4 p-4">
         <h1 className="text-4xl font-bold mb-4">{data.name}</h1>
         <p className="text-lg text-gray-500 mb-2">
           {
@@ -172,7 +172,7 @@ const ProductDetail = () => {
         <p className="text-2xl font-semibold mb-4 text-primary">
           ${data.price}
         </p>
-        <p className="text-gray-700 mb-6 whitespace-pre-line">
+        <p className="text-gray-700 mb-6 whitespace-pre-line text-justify">
           {data.glassDescription ||
             "These full-rim metal frames are currently hot fashion for women and men. The on-trend frame-shape of St. Michael S brings extra elegance with the tasteful Rose Gold finish. The lightweight materials give you extra comfort with adjustable nose pads, for an easy-to-wear comfortable fit"}
         </p>
