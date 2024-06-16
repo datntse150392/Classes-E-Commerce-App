@@ -105,5 +105,38 @@ export const useEyeGlassService = () => {
             });
     };
 
-    return { fetchAllEyeGlass, fetchEyeGlassById, fetchAllEyeGlassTypes, fetchLensType, getAllLens, createOrder };
+    const createOrderProduct = async (data) => {
+        return axios.post(`${baseUrl}/api/Order/Product`, data)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    console.log('No item found in response');
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                return null;
+            });
+    };
+
+    // /api/Order/account/72
+    const fetchCartByAccountID = async (id) => {
+        return axios.get(`${baseUrl}/api/Order/account/${id}`)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    console.log('No item found in response');
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                return null;
+            });
+    };
+
+    return { fetchAllEyeGlass, fetchEyeGlassById, fetchAllEyeGlassTypes, fetchLensType, getAllLens, createOrder, createOrderProduct, fetchCartByAccountID };
 };

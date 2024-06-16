@@ -11,6 +11,8 @@ import {
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -18,11 +20,10 @@ const Sidebar = () => {
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
-    setToastMessage({
-      type: "success",
-      message: "Logged out successfully",
-    });
-    navigate("/");
+    toast.success("Logged out successfully!");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
   
   return (

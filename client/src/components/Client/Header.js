@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "../../context/ToastContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Header = ({ search, setSearch }) => {
   const navigate = useNavigate();
@@ -9,11 +11,10 @@ const Header = ({ search, setSearch }) => {
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
-    setToastMessage({
-      type: "success",
-      message: "Logged out successfully",
-    });
-    navigate("/");
+    toast.success("Logged out successfully!");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   const handleSearchChange = (event) => {
@@ -22,6 +23,7 @@ const Header = ({ search, setSearch }) => {
 
   return (
     <header className="bg-white shadow">
+      <ToastContainer />
       <div className="container mx-auto flex items-center justify-between p-4">
         <div className="text-2xl font-bold">VisionUp</div>
         <input

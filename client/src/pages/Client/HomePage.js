@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import ProductCard from "../../components/Client/ProductCard";
 import { SearchContext } from '../../context/SearchContext';
 import { useLocation } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useToast } from "../../context/ToastContext";
 
@@ -15,7 +15,9 @@ const Homepage = () => {
   const [originalData, setOriginalData] = useState([]);
   const [data, setData] = useState([]);
   const [eyeGlassTypes, setEyeGlassTypes] = useState([]);
-  // const { toast: toastMessage } = location.state || {}; // Access the passed state
+  const [cart, setCart] = useState([]);
+  const [totalCartPrice, setTotalCartPrice] = useState(0);
+
   const { setToastMessage } = useToast();
   const [toastMessage, setToastMessageState] = useState(location.state?.toast || {});
 
@@ -24,7 +26,7 @@ const Homepage = () => {
   const { search } = useContext(SearchContext);
 
   // API variables
-  const { fetchAllEyeGlass, fetchAllEyeGlassTypes } = useEyeGlassService();
+  const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchCartByAccountID } = useEyeGlassService();
 
   // Fetch all eye glass data and eye glass types
   useEffect(() => {
@@ -61,6 +63,20 @@ const Homepage = () => {
       }
     };
 
+    const getCart = async () => {
+      let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+      if (UserInfo) {
+        const response = await fetchCartByAccountID(UserInfo.id);
+        if (response && response.length > 0) {
+          setCart(response);
+          response.forEach((item) => {
+            setTotalCartPrice((prev) => prev + item.price);
+          });
+        }
+      }
+    };
+
+    getCart();
     fetchData();
   }, []);
 
@@ -69,6 +85,9 @@ const Homepage = () => {
       if (toastMessage) {
         if (toastMessage.type === "success" || toastMessage.type === "error") {
           setToastMessage(toastMessage);
+        }
+        if (toastMessage.message === "Logged out successfully") {
+          window.location.reload();
         }
       }
     };
@@ -117,6 +136,20 @@ const Homepage = () => {
       setData([]);
     }
     setEyeGlassTypes(eyeGlassTypesTemp);
+  }
+
+  const convertDateToString = (date) => {
+    return new Date(date).toLocaleDateString();
+  }
+
+  const handleToast = (toastMessage) => {
+    if (toastMessage && toastMessage.type === "success") {
+      toast.success(toastMessage.message);
+    } else if (toastMessage && toastMessage.type === "error") {
+      toast.error(toastMessage.message);
+    } else if (toastMessage && toastMessage.type === "info") {
+      toast.info(toastMessage.message);
+    }
   }
 
   return (
@@ -197,56 +230,9 @@ const Homepage = () => {
           </div>
         </div>
 
-        {/* Women's Collection Section */}
-        {/* <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">KÍNH NỮ BÁN CHẠY</h2>
-          <div className="flex justify-between mb-2">
-            <div className="flex space-x-2">
-              {["All", "Plate", "Bowl", "Glass", "Vase", "Others"].map(
-                (category, index) => (
-                  <button key={index} className="bg-gray-100 px-4 py-2 rounded">
-                    {category}
-                  </button>
-                )
-              )}
-            </div>
-            <a href="#" className="text-blue-500">
-              View all
-            </a>
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            {data.map((item, index) => (
-              <ProductCard
-                key={item.id}
-                id={item.id}
-                name={item.glassName}
-                price={item.glassPrice}
-                rating={4}
-                isNew={index === 0}
-                isHot={index === 1 || index === 2}
-                isSoldOut={index === 3}
-              />
-            ))}
-          </div>
-        </div> */}
-
         {/* Hot Trend Section */}
         <div className="mb-4">
           <h2 className="text-xl font-bold mb-2">KÍNH MẮT HOT TREND</h2>
-          {/* <div className="flex justify-between mb-2">
-            <div className="flex space-x-2">
-              {["All", "Plate", "Bowl", "Glass", "Vase", "Others"].map(
-                (category, index) => (
-                  <button key={index} className="bg-gray-100 px-4 py-2 rounded">
-                    {category}
-                  </button>
-                )
-              )}
-            </div>
-            <a href="#" className="text-blue-500">
-              View all
-            </a>
-          </div> */}
           <div className="grid grid-cols-4 gap-4">
             {/* GET 4 HOT TREND ITEMS HERE */}
             {originalData.slice(0, 4).map((item, index) => (
@@ -302,29 +288,35 @@ const Homepage = () => {
         </div>
 
         {/* Cart Section */}
+        {cart.length > 0 && (
         <div className="bg-white p-4 shadow rounded-md mb-4">
           <h2 className="text-lg font-bold mb-2">Cart</h2>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="bg-gray-300 h-16 w-16 mr-4"></div>
-                  <div>
-                    <p>Product Name</p>
-                    <p className="text-sm text-gray-600">Color</p>
+            <div className="space-y-4">
+              {cart.map((item, index) => (
+                <div key={index} className="flex justify-between items-center border-t-2">
+                  <div className="flex items-center">
+                    <div className="h-16 w-4 mr-4 text-gray-600 content-center">
+                      {index + 1}
+                    </div>
+                    <div className="content-center">
+                      <p className="text-sm text-gray-600 truncate ...">Code: {item.code}</p>
+                      <p className="text-sm text-gray-600">Date: {convertDateToString(item.orderDate)}</p>
+                      <p className="text-sm text-gray-600">Receiver: {item.receiverAddress.trim() || "Quận 7"}</p>
+                    </div>
                   </div>
                 </div>
-                <div>$180</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <p className="text-lg font-bold mb-2">Subtotal: $800</p>
-            <button className="w-full bg-teal-500 text-white py-2 rounded">
-              Check out
-            </button>
-          </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <button onClick={() => handleToast({
+                type: "info",
+                message: "Functionality is in development!"
+              })} className="w-full bg-teal-500 text-white py-2 rounded">
+                Check out
+              </button>
+            </div>
         </div>
+        )}
       </div>
     </div>
   );

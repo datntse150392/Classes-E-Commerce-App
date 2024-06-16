@@ -120,44 +120,11 @@ const SelectLenses = () => {
     ) {
       setDisplayModal(true);
     } else {
-      // alert(
-      //   "Your total is: $" +
-      //     data.price +
-      //     "\n Your prescription is: \n 1. odSphere: " +
-      //     data.odSphere +
-      //     " \n 2. odCylinder: " +
-      //     data.odCylinder +
-      //     " \n 3. odAxis: " +
-      //     data.odAxis +
-      //     " \n 4. osSphere: " +
-      //     data.osSphere +
-      //     " \n 5. osCylinder: " +
-      //     data.osCylinder +
-      //     " \n 6. osAxis: " +
-      //     data.osAxis +
-      //     " \n 7. pdType: " +
-      //     data.pdType +
-      //     " \n 8. Address: " +
-      //     data.address
-      // );
       const [responseCreateOrder] = await Promise.all([createOrder(data)]);
       if (
         responseCreateOrder.status !== undefined &&
         responseCreateOrder.status
       ) {
-        // alert(
-        //   "Order created successfully \n" +
-        //     "Details: \n" +
-        //     "Order code: " +
-        //     responseCreateOrder.code +
-        //     "\n" +
-        //     "Order sender address: " +
-        //     responseCreateOrder.senderAddress +
-        //     "\n" +
-        //     "Order receiver address: " +
-        //     responseCreateOrder.receiverAddress +
-        //     "\n"
-        // );
         toast.success("Order successful");
         navigate("/order-confirm", {
           state: { data: data, orderData: responseCreateOrder }
@@ -184,7 +151,8 @@ const SelectLenses = () => {
       odAxis < 0 ||
       osSphere < 0 ||
       osCylinder < 0 ||
-      osAxis < 0
+      osAxis < 0 ||
+      pdType < 0
     ) {
       toast.error("Invalid data, please check again!");
       return false;
@@ -201,18 +169,6 @@ const SelectLenses = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <ToastContainer />
-      {/* <div className="bg-yellow-100 text-center p-6">
-        <span className="text-lg">
-          Up to 35% Off | CODE: MORE4DAD |{" "}
-          <a href="#" className="underline">
-            Shop now
-          </a>{" "}
-          |{" "}
-          <a href="#" className="underline">
-            Terms & Conditions
-          </a>
-        </span>
-      </div> */}
       <div className="flex flex-1 items-start justify-between p-12">
         <div className="flex-1 flex items-center justify-center">
           <div className="max-w-full">
@@ -325,17 +281,10 @@ const SelectLenses = () => {
                   <span className="col-span-1 text-lg">PD</span>
                   <input
                     type="number"
+                    onChange={(e) => handleChangeValue(e, "pdType")}
                     className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="63"
+                    placeholder="0"
                   />
-                  <label className="flex items-center col-span-3 text-lg">
-                    <input
-                      onChange={(e) => handleChangeValue(e, "pdType")}
-                      type="checkbox"
-                      className="mr-2"
-                    />{" "}
-                    2 PD numbers
-                  </label>
                 </div>
                 <div>
                   <label

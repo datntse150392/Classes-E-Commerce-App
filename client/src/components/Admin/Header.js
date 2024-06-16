@@ -1,23 +1,22 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Header = () => {
   const navigate = useNavigate();
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const handleLogout = () => {
     localStorage.removeItem("UserInfo");
-    navigate("/", {
-      state: {
-        toast: {
-          type: "success",
-          message: "Logged out successfully"
-        },
-      },
-    });
+    toast.success("Logged out successfully!");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (
     <header className="bg-white shadow">
+      <ToastContainer />
       <div className="container mx-auto px-4 py-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <div className="flex items-center">
