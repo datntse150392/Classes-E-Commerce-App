@@ -38,6 +38,8 @@ const Homepage = () => {
         ]);
 
         if (eyeGlassData !== null && eyeGlassData.data.length > 0) {
+          // Check data with status = true
+          eyeGlassData.data = eyeGlassData.data.filter((item) => item.status === true);
           setData(eyeGlassData.data);
           setOriginalData(eyeGlassData.data);
           setLoading(false);
@@ -68,6 +70,8 @@ const Homepage = () => {
       if (UserInfo) {
         const response = await fetchCartByAccountID(UserInfo.id);
         if (response && response.length > 0) {
+          // Sort the cart by order date
+          response.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
           setCart(response);
           response.forEach((item) => {
             setTotalCartPrice((prev) => prev + item.price);

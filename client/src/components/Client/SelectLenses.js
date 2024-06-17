@@ -21,6 +21,7 @@ const SelectLenses = () => {
   const [originalData, setOriginalData] = useState(null);
   const [lensTypes, setLensTypes] = useState([]);
   const [lensData, setLensData] = useState(null);
+  const UserInfo = localStorage.getItem("UserInfo");
 
   // Behavior variables
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,7 @@ const SelectLenses = () => {
   });
 
   // API variables
-  const { fetchLensType, getAllLens, createOrder } = useEyeGlassService();
+  const { fetchLensType, getAllLens, createOrder, createCart } = useEyeGlassService();
 
   const handleLensSelect = (lens) => {
     let updatedData = { ...originalData, lensType: lens.id };
@@ -114,16 +115,17 @@ const SelectLenses = () => {
 
     // Check user is logged in, if not login then show dialog
     if (
-      localStorage.getItem("UserInfo") === undefined ||
-      localStorage.getItem("UserInfo") === null ||
-      localStorage.getItem("UserInfo") === "undefined"
+      UserInfo === undefined ||
+      UserInfo === null ||
+      UserInfo === "undefined"
     ) {
       setDisplayModal(true);
     } else {
-      const [responseCreateOrder] = await Promise.all([createOrder(data)]);
+      const [responseCreateOrder, responseCreateCart] = await Promise.all([createOrder(data), createCart(data)]);
       if (
         responseCreateOrder.status !== undefined &&
-        responseCreateOrder.status
+        responseCreateOrder.status &&
+        responseCreateCart && responseCreateCart.id !== undefined
       ) {
         toast.success("Order successful");
         navigate("/order-confirm", {
@@ -136,6 +138,30 @@ const SelectLenses = () => {
     }
   };
 
+  const handleAddToCart = async () => {
+    const canSubmit = validateForm();
+    if (canSubmit === false) {
+      return;
+    }
+
+    // Check user is logged in, if not login then show dialog
+    const [responseCreateOrder, responseCreateCart] = await Promise.all([createOrder(data), createCart(data)]);
+      if (
+        responseCreateOrder.status !== undefined &&
+        responseCreateOrder.status &&
+        responseCreateCart && responseCreateCart.id !== undefined
+      ) {
+        toast.success("Add to cart successful");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+        clearTimeout();
+      } else {
+        toast.error("Add to cart failed");
+      }
+  }
+
+
   function validateForm() {
     let odSphere = data.odSphere;
     let odCylinder = data.odCylinder;
@@ -144,17 +170,21 @@ const SelectLenses = () => {
     let osCylinder = data.osCylinder;
     let osAxis = data.osAxis;
     let pdType = data.pdType;
+    let addOD = data.addOD;
+    let addOS = data.addOS;
     let address = data.address.trim();
     if (
-      odSphere < 0 ||
-      odCylinder < 0 ||
-      odAxis < 0 ||
-      osSphere < 0 ||
-      osCylinder < 0 ||
-      osAxis < 0 ||
-      pdType < 0
+      odSphere < 1 ||
+      odCylinder < 1 ||
+      odAxis < 1 ||
+      osSphere < 1 ||
+      osCylinder < 1 ||
+      osAxis < 1 ||
+      pdType < 1 ||
+      addOD < 1 ||
+      addOS < 1
     ) {
-      toast.error("Invalid data, please check again!");
+      toast.error("Value must be greater than 0!");
       return false;
     }
 
@@ -202,11 +232,10 @@ const SelectLenses = () => {
                 {lensTypes.map((lens) => (
                   <div
                     key={lens.id}
-                    className={`p-6 border rounded-lg cursor-pointer transition ${
-                      selectedLens && selectedLens.id === lens.id
+                    className={`p-6 border rounded-lg cursor-pointer transition ${selectedLens && selectedLens.id === lens.id
                         ? "bg-yellow-100 border-yellow-500"
                         : "border-gray-300 hover:bg-yellow-100"
-                    }`}
+                      }`}
                     onClick={() => handleLensSelect(lens)}
                   >
                     <h3 className="text-xl font-semibold">
@@ -278,6 +307,21 @@ const SelectLenses = () => {
                   />
                 </div>
                 <div className="prescription-row grid grid-cols-4 gap-6 items-center">
+                  <span className="col-span-1 text-lg">ADD (left/right eye)</span>
+                  <input
+                    type="number"
+                    onChange={(e) => handleChangeValue(e, "addOD")}
+                    className="border border-gray-300 p-4 rounded col-span-1"
+                    placeholder="0.00"
+                  />
+                  <input
+                    type="number"
+                    onChange={(e) => handleChangeValue(e, "addOS")}
+                    className="border border-gray-300 p-4 rounded col-span-1"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="prescription-row grid grid-cols-4 gap-6 items-center">
                   <span className="col-span-1 text-lg">PD</span>
                   <input
                     type="number"
@@ -304,6 +348,16 @@ const SelectLenses = () => {
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
+                {
+                  UserInfo && (
+                    <button
+                      onClick={() => handleAddToCart()}
+                      className="bg-yellow-500 text-white p-4 mr-2 rounded-lg shadow-md hover:bg-yellow-600 transition"
+                    >
+                      Add to Cart
+                    </button>
+                  )
+                }
                 <button
                   onClick={() => handleSubmit()}
                   className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition"
