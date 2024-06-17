@@ -121,7 +121,7 @@ export const useEyeGlassService = () => {
             });
     };
 
-    // /api/Order/account/72
+    // Lấy danh sách cart của user
     const fetchCartByAccountID = async (id) => {
         return axios.get(`${baseUrl}/api/Order/account/${id}`)
             .then(response => {
@@ -138,5 +138,50 @@ export const useEyeGlassService = () => {
             });
     };
 
-    return { fetchAllEyeGlass, fetchEyeGlassById, fetchAllEyeGlassTypes, fetchLensType, getAllLens, createOrder, createOrderProduct, fetchCartByAccountID };
+    // Tạo new cart của user || api/ProductGlass
+    const createCart = async (data) => {
+        let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+        const body = {
+            "id": 0,
+            "eyeGlassID": data.id,
+            "leftLenID": 39,
+            "rightLenID": 39,
+            "accountID": UserInfo.id,
+            "sphereOD": data.odSphere,
+            "cylinderOD": data.odCylinder,
+            "axisOD": data.odAxis,
+            "sphereOS": data.osSphere,
+            "cylinderOS": data.osCylinder,
+            "axisOS": data.osAxis,
+            "addOD": data.addOD,
+            "addOS": data.addOS,
+            "pd": data.pdType,
+            "status": true
+        }
+        return axios.post(`${baseUrl}/api/ProductGlass`, body)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    console.log('No item found in response');
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                return null;
+            });
+    };
+
+    return {
+        fetchAllEyeGlass,
+        fetchEyeGlassById,
+        fetchAllEyeGlassTypes,
+        fetchLensType,
+        getAllLens,
+        createOrder,
+        createOrderProduct,
+        fetchCartByAccountID,
+        createCart
+    };
 };
