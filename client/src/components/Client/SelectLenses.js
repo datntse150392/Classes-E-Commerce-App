@@ -18,17 +18,18 @@ const SelectLenses = () => {
   const [originalData, setOriginalData] = useState(null);
   const [lensTypes, setLensTypes] = useState([]);
   const [lensData, setLensData] = useState(null);
+  const [lensOptions, setLensOptions] = useState([]);
   const UserInfo = localStorage.getItem("UserInfo");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayModal, setDisplayModal] = useState(false);
 
-  const { fetchLensType, getAllLens, createOrder, createCart } =
+  const { fetchLensType, getAllLens, createOrder, createProductGlass, createCart } =
     useEyeGlassService();
 
   const handleLensSelect = (lens) => {
-    let updatedData = { ...originalData, lensType: lens.id };
+    let updatedData = { ...originalData, lensData: lens };
     setData(updatedData);
     setSelectedLens(lens);
     if (lens.id === 1 || lens.subOptions === undefined) {
@@ -57,7 +58,6 @@ const SelectLenses = () => {
           };
           setData(initialData);
           setOriginalData(initialData);
-          setLoading(false);
         }
 
         const [lensData, lensTypes] = await Promise.all([
@@ -65,13 +65,8 @@ const SelectLenses = () => {
           fetchLensType(),
         ]);
 
-        if (lensData !== null && lensData.length > 0) {
-          setLensData(lensData);
-          setLoading(false);
-        }
-
-        if (lensTypes !== null && lensTypes.length > 0) {
-          setLensTypes(lensTypes);
+        if (lensData !== null && lensData.data.length > 0 && lensTypes !== null && lensTypes.length > 0) {
+          mappingLensTypesWithLensData(lensData.data, lensTypes);
           setLoading(false);
         }
       } catch (error) {
@@ -82,18 +77,6 @@ const SelectLenses = () => {
 
     fetchData();
   }, [productData, id, navigate]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!data) {
-    return <div>No data available</div>;
-  }
 
   const handleChangeValue = (e, key) => {
     let updatedData = { ...data, [key]: e.target.value };
@@ -109,18 +92,23 @@ const SelectLenses = () => {
     if (!UserInfo) {
       setDisplayModal(true);
     } else {
-      const [responseCreateOrder, responseCreateCart] = await Promise.all([
+      const [responseCreateOrder, responsecreateProductGlass] = await Promise.all([
         createOrder(data),
-        createCart(data),
+        createProductGlass(data),
       ]);
       if (
         responseCreateOrder.status &&
-        responseCreateCart &&
-        responseCreateCart.id
+        responsecreateProductGlass &&
+        responsecreateProductGlass.id
       ) {
         toast.success("Order successful");
         navigate("/order-confirm", {
-          state: { data, orderData: responseCreateOrder },
+          state: {
+            data,
+            orderData: responseCreateOrder,
+            productGlassData: responsecreateProductGlass,
+            typePayment : "oneItem"
+          },
         });
       } else {
         setDisplayModal(false);
@@ -135,15 +123,10 @@ const SelectLenses = () => {
       return;
     }
 
-    const [responseCreateOrder, responseCreateCart] = await Promise.all([
-      createOrder(data),
-      createCart(data),
+    const [responseCreateCart] = await Promise.all([
+      createCart(data)
     ]);
-    if (
-      responseCreateOrder.status &&
-      responseCreateCart &&
-      responseCreateCart.id
-    ) {
+    if ( responseCreateCart && responseCreateCart.accountID !== undefined) {
       toast.success("Add to cart successful");
       setTimeout(() => {
         navigate("/");
@@ -193,100 +176,33 @@ const SelectLenses = () => {
     return true;
   };
 
-  const lensOptions = [
-    {
-      id: 1,
-      title: "Single Vision (Distance)",
-      description:
-        "General use lenses for common prescriptions and seeing things from distance.",
-    },
-    {
-      id: 2,
-      title: "Bifocal & Progressive",
-      description:
-        "One pair of glasses corrects vision at near, middle, and far distances.",
-      subOptions: [
-        {
-          id: 2.1,
-          title: "Bifocal",
-          description:
-            "Lenses for both reading up close and seeing clearly at distance with a visible line to separate the two portions.",
-          price: 29,
-        },
-        {
-          id: 2.2,
-          title: "Progressive",
-          description:
-            "No-line lenses with a smooth transition for near, intermediate, and far vision correction.",
-          price: 49,
-        },
-        {
-          id: 2.3,
-          title: "Premium Progressive",
-          description:
-            "Premium lenses with the best seamless transitional vision correction for all distances.",
-          price: 89,
-        },
-        {
-          id: 2.4,
-          title: "KODAK Progressive Lens",
-          description:
-            "KODAK lenses that are easy to adapt to with wider near-viewing, superior comfort, and sharper vision at all distances.",
-          price: 189,
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Reading",
-      description: "Lenses that magnify to assist with reading.",
-      subOptions: [
-        {
-          id: 3.1,
-          title: "Readers",
-          description: "Lenses for reading up close.",
-          price: 29,
-        },
-        {
-          id: 3.2,
-          title: "Intermediate",
-          description: "Lenses for reading at computer screen distance.",
-          price: 49,
-        },
-      ],
-    },
-    {
-      id: 4,
-      title: "Non-Prescription",
-      description: "Basic lenses with no vision correction.",
-      subOptions: [
-        {
-          id: 4.1,
-          title: "Clear",
-          description:
-            "Transparent lenses for enhanced clarity and everyday use.",
-        },
-        {
-          id: 4.2,
-          title: "Blue Light Filtering",
-          description:
-            "Lenses that filter blue-violet light from sun and some digital screens to help preserve your visual comfort.",
-        },
-        {
-          id: 4.3,
-          title: "Transitions & Photochromic",
-          description:
-            "2-in-1 lenses that automatically darken when exposed to direct sunlight.",
-        },
-        {
-          id: 4.4,
-          title: "Sun",
-          description:
-            "Color tinted lenses with UV protection and polarized options to reduce glare.",
-        },
-      ],
-    },
-  ];
+  function mappingLensTypesWithLensData(lensData, lensTypes) {
+    // Init lens types data
+    let mappingLensTypes = [];
+    lensTypes.forEach((item) => {
+      if (item.status) {
+        mappingLensTypes.push({
+          id: item.id,
+          title: item.description,
+          subOptions: lensData.filter((lens) => lens.lensType.id === item.id && lens.status),
+        });
+      }
+    });
+
+    setLensOptions(mappingLensTypes);
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!data) {
+    return <div>No data available</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -389,72 +305,49 @@ const LensSelection = ({
       <div className="space-y-6">
         {lensTypes.map((lens) => (
           <div key={lens.id}>
-            {lens.id === 1 ? (
-              <div
-                className={`p-6 border rounded-lg cursor-pointer transition ${
-                  selectedLens && selectedLens.id === lens.id
-                    ? "bg-yellow-100 border-yellow-500"
-                    : "border-gray-300 hover:bg-yellow-100"
+            <div
+              className={`p-6 border rounded-lg cursor-pointer transition ${expandedLens && expandedLens.id === lens.id
+                ? "bg-yellow-100 border-yellow-500"
+                : "border-gray-300 hover:bg-yellow-100"
                 }`}
-                onClick={() => {
-                  setSelectedLens(lens);
-                  handleLensSelect(lens);
-                }}
-              >
-                <h3 className="text-xl font-semibold">{lens.title}</h3>
-                <p className="text-gray-600">{lens.description}</p>
-              </div>
-            ) : (
-              <>
-                <div
-                  className={`p-6 border rounded-lg cursor-pointer transition ${
-                    expandedLens && expandedLens.id === lens.id
-                      ? "bg-yellow-100 border-yellow-500"
-                      : "border-gray-300 hover:bg-yellow-100"
-                  }`}
-                  onClick={() => handleExpand(lens)}
-                >
-                  <h3 className="text-xl font-semibold">{lens.title}</h3>
-                  <p className="text-gray-600">{lens.description}</p>
-                </div>
-                {expandedLens &&
-                  expandedLens.id === lens.id &&
-                  lens.subOptions && (
-                    <div className="pl-6 mt-4 space-y-4">
-                      {lens.subOptions.map((subOption) => (
-                        <div
-                          key={subOption.id}
-                          className={`p-4 border rounded-lg cursor-pointer transition ${
-                            selectedLens && selectedLens.id === subOption.id
-                              ? "bg-yellow-100 border-yellow-500"
-                              : "border-gray-300 hover:bg-yellow-100"
-                          }`}
-                          onClick={() => {
-                            setSelectedLens(subOption);
-                            handleLensSelect(subOption);
-                          }}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="text-lg font-semibold">
-                                {subOption.title}
-                              </h4>
-                              <p className="text-gray-600">
-                                {subOption.description}
-                              </p>
-                            </div>
-                            {subOption.price && (
-                              <div className="text-lg font-semibold">
-                                ${subOption.price}
-                              </div>
-                            )}
-                          </div>
+              onClick={() => handleExpand(lens)}
+            >
+              <h3 className="text-xl font-semibold">{lens.title}</h3>
+            </div>
+            {expandedLens && expandedLens.id === lens.id &&
+              lens.subOptions && (
+                <div className="pl-6 mt-4 space-y-4">
+                  {lens.subOptions.map((subOption) => (
+                    <div
+                      key={subOption.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition ${selectedLens && selectedLens.id === subOption.id
+                        ? "bg-yellow-100 border-yellow-500"
+                        : "border-gray-300 hover:bg-yellow-100"
+                        }`}
+                      onClick={() => {
+                        setSelectedLens(subOption);
+                        handleLensSelect(subOption);
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="text-lg font-semibold">
+                            {subOption.lensName}
+                          </h4>
+                          <p className="text-gray-600">
+                            {subOption.lensDescription}
+                          </p>
                         </div>
-                      ))}
+                        {subOption.lensPrice && (
+                          <div className="text-lg font-semibold">
+                            ${subOption.lensPrice}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-              </>
-            )}
+                  ))}
+                </div>
+              )}
           </div>
         ))}
       </div>

@@ -16,38 +16,36 @@ import Eyeglasses from "./pages/Admin/EyeglassesPage";
 import Lenses from "./pages/Admin/LensesPage";
 import Users from "./pages/Admin/UsersPage";
 import OrderConfirmation from "./components/Client/OrderConfirmation";
+import CartPage from "./components/Client/CartPage";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ClientLayout>
+        <Route path="/">
+          <Route index element=
+            {<ClientLayout>
               <Homepage />
-            </ClientLayout>
-          }
-        />
+            </ClientLayout>} />
+          <Route
+            path="/cart"
+            element={
+              <ClientLayout>
+                <CartStep />
+              </ClientLayout>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ClientLayout>
+                <ProductDetail />
+              </ClientLayout>
+            }
+          />
+        </Route>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignUpForm />} />
-        <Route
-          path="/product/:id"
-          element={
-            <ClientLayout>
-              <ProductDetail />
-            </ClientLayout>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <ClientLayout>
-              <CartStep />
-            </ClientLayout>
-          }
-        />
-
         <Route
           path="/checkout"
           element={
