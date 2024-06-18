@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import LoginModal from "./LoginModal";
-import DialogModal from "./DialogModal";
 import { useToast } from "../../context/ToastContext";
-
-// IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,25 +20,22 @@ const SelectLenses = () => {
   const [lensData, setLensData] = useState(null);
   const UserInfo = localStorage.getItem("UserInfo");
 
-  // Behavior variables
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayModal, setDisplayModal] = useState(false);
-  const [displayConfirmModal, setDisplayConfirmModal] = useState(true);
-  const [bodyDialog, setBodyDialog] = useState({
-    header: "",
-    message: "",
-    status: "",
-  });
 
-  // API variables
-  const { fetchLensType, getAllLens, createOrder, createCart } = useEyeGlassService();
+  const { fetchLensType, getAllLens, createOrder, createCart } =
+    useEyeGlassService();
 
   const handleLensSelect = (lens) => {
     let updatedData = { ...originalData, lensType: lens.id };
     setData(updatedData);
     setSelectedLens(lens);
-    setStep(2);
+    if (lens.id === 1 || lens.subOptions === undefined) {
+      setStep(2);
+    } else if (lens.id === 4) {
+      setStep(3); // Chuyển đến bước hiển thị các tùy chọn con cho Non-Prescription
+    }
   };
 
   useEffect(() => {
@@ -101,7 +95,6 @@ const SelectLenses = () => {
     return <div>No data available</div>;
   }
 
-  // LOGIC FUNCTIONS ZONE
   const handleChangeValue = (e, key) => {
     let updatedData = { ...data, [key]: e.target.value };
     setData(updatedData);
@@ -109,28 +102,26 @@ const SelectLenses = () => {
 
   const handleSubmit = async () => {
     const canSubmit = validateForm();
-    if (canSubmit === false) {
+    if (!canSubmit) {
       return;
     }
 
-    // Check user is logged in, if not login then show dialog
-    if (
-      UserInfo === undefined ||
-      UserInfo === null ||
-      UserInfo === "undefined"
-    ) {
+    if (!UserInfo) {
       setDisplayModal(true);
     } else {
-      const [responseCreateOrder, responseCreateCart] = await Promise.all([createOrder(data), createCart(data)]);
+      const [responseCreateOrder, responseCreateCart] = await Promise.all([
+        createOrder(data),
+        createCart(data),
+      ]);
       if (
-        responseCreateOrder.status !== undefined &&
         responseCreateOrder.status &&
-        responseCreateCart && responseCreateCart.id !== undefined
+        responseCreateCart &&
+        responseCreateCart.id
       ) {
         toast.success("Order successful");
         navigate("/order-confirm", {
-          state: { data: data, orderData: responseCreateOrder }
-        })
+          state: { data, orderData: responseCreateOrder },
+        });
       } else {
         setDisplayModal(false);
         toast.error("Order failed");
@@ -140,61 +131,162 @@ const SelectLenses = () => {
 
   const handleAddToCart = async () => {
     const canSubmit = validateForm();
-    if (canSubmit === false) {
+    if (!canSubmit) {
       return;
     }
 
-    // Check user is logged in, if not login then show dialog
-    const [responseCreateOrder, responseCreateCart] = await Promise.all([createOrder(data), createCart(data)]);
-      if (
-        responseCreateOrder.status !== undefined &&
-        responseCreateOrder.status &&
-        responseCreateCart && responseCreateCart.id !== undefined
-      ) {
-        toast.success("Add to cart successful");
-        setTimeout(() => {
-          navigate("/");
-        }, 1000);
-        clearTimeout();
-      } else {
-        toast.error("Add to cart failed");
-      }
-  }
-
-
-  function validateForm() {
-    let odSphere = data.odSphere;
-    let odCylinder = data.odCylinder;
-    let odAxis = data.odAxis;
-    let osSphere = data.osSphere;
-    let osCylinder = data.osCylinder;
-    let osAxis = data.osAxis;
-    let pdType = data.pdType;
-    let addOD = data.addOD;
-    let addOS = data.addOS;
-    let address = data.address.trim();
+    const [responseCreateOrder, responseCreateCart] = await Promise.all([
+      createOrder(data),
+      createCart(data),
+    ]);
     if (
-      odSphere < 1 ||
-      odCylinder < 1 ||
-      odAxis < 1 ||
-      osSphere < 1 ||
-      osCylinder < 1 ||
-      osAxis < 1 ||
-      pdType < 1 ||
-      addOD < 1 ||
-      addOS < 1
+      responseCreateOrder.status &&
+      responseCreateCart &&
+      responseCreateCart.id
+    ) {
+      toast.success("Add to cart successful");
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+      clearTimeout();
+    } else {
+      toast.error("Add to cart failed");
+    }
+  };
+
+  const validateForm = () => {
+    const {
+      odSphere,
+      odCylinder,
+      odAxis,
+      osSphere,
+      osCylinder,
+      osAxis,
+      pdType,
+      addOD,
+      addOS,
+      address,
+    } = data;
+
+    if (
+      [
+        odSphere,
+        odCylinder,
+        odAxis,
+        osSphere,
+        osCylinder,
+        osAxis,
+        pdType,
+        addOD,
+        addOS,
+      ].some((value) => value < 1)
     ) {
       toast.error("Value must be greater than 0!");
       return false;
     }
 
-    if (address === undefined || address === null || address === "") {
+    if (!address.trim()) {
       toast.error("Please enter your address!");
       return false;
     }
 
     return true;
-  }
+  };
+
+  const lensOptions = [
+    {
+      id: 1,
+      title: "Single Vision (Distance)",
+      description:
+        "General use lenses for common prescriptions and seeing things from distance.",
+    },
+    {
+      id: 2,
+      title: "Bifocal & Progressive",
+      description:
+        "One pair of glasses corrects vision at near, middle, and far distances.",
+      subOptions: [
+        {
+          id: 2.1,
+          title: "Bifocal",
+          description:
+            "Lenses for both reading up close and seeing clearly at distance with a visible line to separate the two portions.",
+          price: 29,
+        },
+        {
+          id: 2.2,
+          title: "Progressive",
+          description:
+            "No-line lenses with a smooth transition for near, intermediate, and far vision correction.",
+          price: 49,
+        },
+        {
+          id: 2.3,
+          title: "Premium Progressive",
+          description:
+            "Premium lenses with the best seamless transitional vision correction for all distances.",
+          price: 89,
+        },
+        {
+          id: 2.4,
+          title: "KODAK Progressive Lens",
+          description:
+            "KODAK lenses that are easy to adapt to with wider near-viewing, superior comfort, and sharper vision at all distances.",
+          price: 189,
+        },
+      ],
+    },
+    {
+      id: 3,
+      title: "Reading",
+      description: "Lenses that magnify to assist with reading.",
+      subOptions: [
+        {
+          id: 3.1,
+          title: "Readers",
+          description: "Lenses for reading up close.",
+          price: 29,
+        },
+        {
+          id: 3.2,
+          title: "Intermediate",
+          description: "Lenses for reading at computer screen distance.",
+          price: 49,
+        },
+      ],
+    },
+    {
+      id: 4,
+      title: "Non-Prescription",
+      description: "Basic lenses with no vision correction.",
+      subOptions: [
+        {
+          id: 4.1,
+          title: "Clear",
+          description:
+            "Transparent lenses for enhanced clarity and everyday use.",
+        },
+        {
+          id: 4.2,
+          title: "Blue Light Filtering",
+          description:
+            "Lenses that filter blue-violet light from sun and some digital screens to help preserve your visual comfort.",
+        },
+        {
+          id: 4.3,
+          title: "Transitions & Photochromic",
+          description:
+            "2-in-1 lenses that automatically darken when exposed to direct sunlight.",
+        },
+        {
+          id: 4.4,
+          title: "Sun",
+          description:
+            "Color tinted lenses with UV protection and polarized options to reduce glare.",
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -215,163 +307,34 @@ const SelectLenses = () => {
         </div>
         <div className="flex-1 bg-white shadow-lg rounded-lg p-8 mx-6 max-w-full w-full">
           {step === 1 && (
-            <div className="lens-selection">
-              <button
-                onClick={() => navigate(`/product/${id}`)}
-                className="text-lg text-gray-600 mb-6"
-              >
-                Back to {data.name}
-              </button>
-              <h2 className="text-2xl font-bold mb-6">Choose your usage</h2>
-              <p className="text-lg text-gray-600 mb-6">
-                <a href="#" className="underline">
-                  Learn about different lens usages
-                </a>
-              </p>
-              <div className="space-y-6">
-                {lensTypes.map((lens) => (
-                  <div
-                    key={lens.id}
-                    className={`p-6 border rounded-lg cursor-pointer transition ${selectedLens && selectedLens.id === lens.id
-                        ? "bg-yellow-100 border-yellow-500"
-                        : "border-gray-300 hover:bg-yellow-100"
-                      }`}
-                    onClick={() => handleLensSelect(lens)}
-                  >
-                    <h3 className="text-xl font-semibold">
-                      {lens.description}
-                    </h3>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <LensSelection
+              lensTypes={lensOptions}
+              selectedLens={selectedLens}
+              setSelectedLens={setSelectedLens}
+              handleLensSelect={handleLensSelect}
+              navigate={navigate}
+              data={data}
+            />
           )}
-
           {step === 2 && (
-            <div className="prescription-selection">
-              <button
-                className="text-lg text-gray-600 mb-6"
-                onClick={() => setStep(1)}
-              >
-                Back to Lens Selection
-              </button>
-              <h2 className="text-2xl font-bold mb-6">
-                Enter your prescription
-              </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                <a href="#" className="underline">
-                  Learn how to read your prescription
-                </a>
-              </p>
-              <div className="space-y-6">
-                <div className="prescription-row grid grid-cols-4 gap-6 items-center">
-                  <span className="col-span-1 text-lg">OD (right eye)</span>
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "odSphere")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "odCylinder")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "odAxis")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0"
-                  />
-                </div>
-                <div className="prescription-row grid grid-cols-4 gap-6 items-center">
-                  <span className="col-span-1 text-lg">OS (left eye)</span>
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "osSphere")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "osCylinder")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "osAxis")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0"
-                  />
-                </div>
-                <div className="prescription-row grid grid-cols-4 gap-6 items-center">
-                  <span className="col-span-1 text-lg">ADD (left/right eye)</span>
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "addOD")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "addOS")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="prescription-row grid grid-cols-4 gap-6 items-center">
-                  <span className="col-span-1 text-lg">PD</span>
-                  <input
-                    type="number"
-                    onChange={(e) => handleChangeValue(e, "pdType")}
-                    className="border border-gray-300 p-4 rounded col-span-1"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="address"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Your address
-                  </label>
-                  <input
-                    onChange={(e) => handleChangeValue(e, "address")}
-                    type="text"
-                    name="address"
-                    id="address"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end">
-                {
-                  UserInfo && (
-                    <button
-                      onClick={() => handleAddToCart()}
-                      className="bg-yellow-500 text-white p-4 mr-2 rounded-lg shadow-md hover:bg-yellow-600 transition"
-                    >
-                      Add to Cart
-                    </button>
-                  )
-                }
-                <button
-                  onClick={() => handleSubmit()}
-                  className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition"
-                >
-                  Save & Continue
-                </button>
-                <LoginModal
-                  toggle={displayModal}
-                  setDisplayModal={setDisplayModal}
-                  setBodyDialog={setBodyDialog}
-                  data={data}
-                />
-              </div>
-            </div>
+            <PrescriptionSelection
+              data={data}
+              handleChangeValue={handleChangeValue}
+              handleSubmit={handleSubmit}
+              handleAddToCart={handleAddToCart}
+              setStep={setStep}
+              displayModal={displayModal}
+              setDisplayModal={setDisplayModal}
+              UserInfo={UserInfo}
+            />
+          )}
+          {step === 3 && (
+            <NonPrescriptionSelection
+              lensTypes={lensOptions.find((lens) => lens.id === 4).subOptions}
+              selectedLens={selectedLens}
+              setSelectedLens={setSelectedLens}
+              handleLensSelect={handleLensSelect}
+            />
           )}
         </div>
       </div>
@@ -387,6 +350,247 @@ const SelectLenses = () => {
           </a>
         </span>
       </div>
+    </div>
+  );
+};
+
+const LensSelection = ({
+  lensTypes,
+  selectedLens,
+  setSelectedLens,
+  handleLensSelect,
+  navigate,
+  data,
+}) => {
+  const [expandedLens, setExpandedLens] = useState(null);
+
+  const handleExpand = (lens) => {
+    if (expandedLens && expandedLens.id === lens.id) {
+      setExpandedLens(null);
+    } else {
+      setExpandedLens(lens);
+    }
+  };
+
+  return (
+    <div className="lens-selection">
+      <button
+        onClick={() => navigate(`/product/${data.id}`)}
+        className="text-lg text-gray-600 mb-6"
+      >
+        Back to {data.name}
+      </button>
+      <h2 className="text-2xl font-bold mb-6">Choose your usage</h2>
+      <p className="text-lg text-gray-600 mb-6">
+        <a href="#" className="underline">
+          Learn about different lens usages
+        </a>
+      </p>
+      <div className="space-y-6">
+        {lensTypes.map((lens) => (
+          <div key={lens.id}>
+            {lens.id === 1 ? (
+              <div
+                className={`p-6 border rounded-lg cursor-pointer transition ${
+                  selectedLens && selectedLens.id === lens.id
+                    ? "bg-yellow-100 border-yellow-500"
+                    : "border-gray-300 hover:bg-yellow-100"
+                }`}
+                onClick={() => {
+                  setSelectedLens(lens);
+                  handleLensSelect(lens);
+                }}
+              >
+                <h3 className="text-xl font-semibold">{lens.title}</h3>
+                <p className="text-gray-600">{lens.description}</p>
+              </div>
+            ) : (
+              <>
+                <div
+                  className={`p-6 border rounded-lg cursor-pointer transition ${
+                    expandedLens && expandedLens.id === lens.id
+                      ? "bg-yellow-100 border-yellow-500"
+                      : "border-gray-300 hover:bg-yellow-100"
+                  }`}
+                  onClick={() => handleExpand(lens)}
+                >
+                  <h3 className="text-xl font-semibold">{lens.title}</h3>
+                  <p className="text-gray-600">{lens.description}</p>
+                </div>
+                {expandedLens &&
+                  expandedLens.id === lens.id &&
+                  lens.subOptions && (
+                    <div className="pl-6 mt-4 space-y-4">
+                      {lens.subOptions.map((subOption) => (
+                        <div
+                          key={subOption.id}
+                          className={`p-4 border rounded-lg cursor-pointer transition ${
+                            selectedLens && selectedLens.id === subOption.id
+                              ? "bg-yellow-100 border-yellow-500"
+                              : "border-gray-300 hover:bg-yellow-100"
+                          }`}
+                          onClick={() => {
+                            setSelectedLens(subOption);
+                            handleLensSelect(subOption);
+                          }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="text-lg font-semibold">
+                                {subOption.title}
+                              </h4>
+                              <p className="text-gray-600">
+                                {subOption.description}
+                              </p>
+                            </div>
+                            {subOption.price && (
+                              <div className="text-lg font-semibold">
+                                ${subOption.price}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const NonPrescriptionSelection = ({
+  lensTypes,
+  selectedLens,
+  setSelectedLens,
+  handleLensSelect,
+}) => {
+  return (
+    <div className="non-prescription-selection">
+      <h2 className="text-2xl font-bold mb-6">Choose a lens color</h2>
+      <div className="space-y-6">
+        {lensTypes.map((lens) => (
+          <div
+            key={lens.id}
+            className={`p-6 border rounded-lg cursor-pointer transition ${
+              selectedLens && selectedLens.id === lens.id
+                ? "bg-yellow-100 border-yellow-500"
+                : "border-gray-300 hover:bg-yellow-100"
+            }`}
+            onClick={() => {
+              setSelectedLens(lens);
+              handleLensSelect(lens);
+            }}
+          >
+            <h3 className="text-xl font-semibold">{lens.title}</h3>
+            <p className="text-gray-600">{lens.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const PrescriptionSelection = ({
+  data,
+  handleChangeValue,
+  handleSubmit,
+  handleAddToCart,
+  setStep,
+  displayModal,
+  setDisplayModal,
+  UserInfo,
+}) => {
+  return (
+    <div className="prescription-selection">
+      <button className="text-lg text-gray-600 mb-6" onClick={() => setStep(1)}>
+        Back to Lens Selection
+      </button>
+      <h2 className="text-2xl font-bold mb-6">Enter your prescription</h2>
+      <p className="text-lg text-gray-600 mb-6">
+        <a href="#" className="underline">
+          Learn how to read your prescription
+        </a>
+      </p>
+      <div className="space-y-6">
+        <PrescriptionInput
+          label="OD (right eye)"
+          handleChangeValue={handleChangeValue}
+          fields={["odSphere", "odCylinder", "odAxis"]}
+        />
+        <PrescriptionInput
+          label="OS (left eye)"
+          handleChangeValue={handleChangeValue}
+          fields={["osSphere", "osCylinder", "osAxis"]}
+        />
+        <PrescriptionInput
+          label="ADD (left/right eye)"
+          handleChangeValue={handleChangeValue}
+          fields={["addOD", "addOS"]}
+        />
+        <PrescriptionInput
+          label="PD"
+          handleChangeValue={handleChangeValue}
+          fields={["pdType"]}
+        />
+        <div>
+          <label
+            htmlFor="address"
+            className="block mb-2 text-sm font-medium text-gray-900"
+          >
+            Your address
+          </label>
+          <input
+            onChange={(e) => handleChangeValue(e, "address")}
+            type="text"
+            name="address"
+            id="address"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            required
+          />
+        </div>
+      </div>
+      <div className="mt-6 flex justify-end">
+        {UserInfo && (
+          <button
+            onClick={handleAddToCart}
+            className="bg-yellow-500 text-white p-4 mr-2 rounded-lg shadow-md hover:bg-yellow-600 transition"
+          >
+            Add to Cart
+          </button>
+        )}
+        <button
+          onClick={handleSubmit}
+          className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition"
+        >
+          Save & Continue
+        </button>
+        <LoginModal
+          toggle={displayModal}
+          setDisplayModal={setDisplayModal}
+          data={data}
+        />
+      </div>
+    </div>
+  );
+};
+
+const PrescriptionInput = ({ label, handleChangeValue, fields }) => {
+  return (
+    <div className="prescription-row grid grid-cols-4 gap-6 items-center">
+      <span className="col-span-1 text-lg">{label}</span>
+      {fields.map((field) => (
+        <input
+          key={field}
+          type="number"
+          onChange={(e) => handleChangeValue(e, field)}
+          className="border border-gray-300 p-4 rounded col-span-1"
+          placeholder="0.00"
+        />
+      ))}
     </div>
   );
 };
