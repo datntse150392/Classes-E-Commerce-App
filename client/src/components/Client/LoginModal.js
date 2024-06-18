@@ -17,7 +17,7 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
 
   // API variables
   const { login, register } = useAuthService();
-  const { createOrder } = useEyeGlassService();
+  const { createOrder, createProductGlass } = useEyeGlassService();
 
 
     const handleModalToggle = () => {
@@ -46,23 +46,19 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
             navigate("/order-confirm", {
                 state: { data: data }
             });
-            // alert("Your total is: $" + data.price +
-            //     "\n Your prescription is: \n 1. odSphere: " + data.odSphere +
-            //     " \n 2. odCylinder: " + data.odCylinder +
-            //     " \n 3. odAxis: " + data.odAxis + " \n 4. osSphere: " + data.osSphere +
-            //     " \n 5. osCylinder: " + data.osCylinder + " \n 6. osAxis: " + data.osAxis +
-            //     " \n 7. pdType: " + data.pdType + " \n 8. address: " + data.address);
-            const [responseCreateOrder] = await Promise.all([createOrder(data)]);
-            if (responseCreateOrder.status !== undefined && responseCreateOrder.status) {
-                // alert("Order created successfully \n" +
-                // "Details: \n" +
-                // "Order code: " + responseCreateOrder.code + "\n" +
-                // "Order sender address: " + responseCreateOrder.senderAddress + "\n" +
-                // "Order receiver address: " + responseCreateOrder.receiverAddress + "\n");
+            const [responseCreateOrder, responsecreateProductGlass] = await Promise.all([
+                createOrder(data),
+                createProductGlass(data)
+            ]);
+            if (
+                responseCreateOrder.status &&
+                responsecreateProductGlass &&
+                responsecreateProductGlass.id
+            ) {
                 toast.success("Order created successfully");
                 setTimeout(() => {
                     navigate("/order-confirm", {
-                        state: { data: data, orderData: responseCreateOrder }
+                        state: { data: data, orderData: responseCreateOrder, productGlassData: responsecreateProductGlass }
                       })
                 }, 1000);
             } else {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import ProductCard from "../../components/Client/ProductCard";
 import { SearchContext } from '../../context/SearchContext';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useToast } from "../../context/ToastContext";
@@ -12,9 +12,11 @@ import { useEyeGlassService } from "../../services/index";
 const Homepage = () => {
   // Data variables
   const location = useLocation();
+  const navigate = useNavigate();
   const [originalData, setOriginalData] = useState([]);
   const [data, setData] = useState([]);
   const [eyeGlassTypes, setEyeGlassTypes] = useState([]);
+  const [order, setOrder] = useState([]);
   const [cart, setCart] = useState([]);
   const [totalCartPrice, setTotalCartPrice] = useState(0);
 
@@ -26,7 +28,7 @@ const Homepage = () => {
   const { search } = useContext(SearchContext);
 
   // API variables
-  const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchCartByAccountID } = useEyeGlassService();
+  const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchOrderByAccountID, fetchCartByAccountID } = useEyeGlassService();
 
   // Fetch all eye glass data and eye glass types
   useEffect(() => {
@@ -65,22 +67,24 @@ const Homepage = () => {
       }
     };
 
-    const getCart = async () => {
+    const getCartAndOrder = async () => {
       let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
       if (UserInfo) {
-        const response = await fetchCartByAccountID(UserInfo.id);
-        if (response && response.length > 0) {
+        const [orderResponse, cartResponse] = await Promise.all([
+          fetchOrderByAccountID(UserInfo.id),
+          fetchCartByAccountID(UserInfo.id)
+        ]);
+        if (orderResponse && orderResponse.length > 0 && cartResponse && cartResponse.cartDetails.length > 0) {
           // Sort the cart by order date
-          response.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-          setCart(response);
-          response.forEach((item) => {
-            setTotalCartPrice((prev) => prev + item.price);
-          });
+          orderResponse.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+          setOrder(orderResponse);
+
+          setCart(cartResponse);
         }
       }
     };
 
-    getCart();
+    getCartAndOrder();
     fetchData();
   }, []);
 
@@ -106,10 +110,6 @@ const Homepage = () => {
     });
     setData(eyeGlassDataTemp);
   }, [search, originalData]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   // PAGES LOGIC ZONE
   const changeEyeGlassTypes = (item) => {
@@ -154,6 +154,16 @@ const Homepage = () => {
     } else if (toastMessage && toastMessage.type === "info") {
       toast.info(toastMessage.message);
     }
+  }
+
+  const handleRedirectToCart = () => {
+    navigate("/cart", {
+      state: { cart: cart }
+    });
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -281,7 +291,7 @@ const Homepage = () => {
           <div className="space-y-4">
             {[...Array(3)].map((_, index) => (
               <div key={index} className="flex items-center">
-                <div className="bg-gray-300 h-16 w-16 mr-4"></div>
+                <div className="custom-bg"></div>
                 <div>
                   <p className="text-sm">27/05/2023</p>
                   <p>Decorate your home with recycled products</p>
@@ -292,31 +302,46 @@ const Homepage = () => {
         </div>
 
         {/* Cart Section */}
-        {cart.length > 0 && (
+        {cart && cart.cartDetails && cart.cartDetails.length > 0 && (
         <div className="bg-white p-4 shadow rounded-md mb-4">
           <h2 className="text-lg font-bold mb-2">Cart</h2>
             <div className="space-y-4">
-              {cart.map((item, index) => (
-                <div key={index} className="flex justify-between items-center border-t-2">
+              {cart.cartDetails.map((item, index) => (
+                <div key={index}
+                  className="cursor-pointer flex justify-between items-center border-t-2 py-2"
+                  style={{
+                    marginTop: 0
+                  }}>
                   <div className="flex items-center">
-                    <div className="h-16 w-4 mr-4 text-gray-600 content-center">
-                      {index + 1}
-                    </div>
+                    <div
+                      className="h-12 w-12 mr-2"
+                      style={{
+                        backgroundImage: "url('https://img.icons8.com/bubbles/100/shopping-cart-loaded.png')",
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    ></div>
                     <div className="content-center">
-                      <p className="text-sm text-gray-600 truncate ...">Code: {item.code}</p>
-                      <p className="text-sm text-gray-600">Date: {convertDateToString(item.orderDate)}</p>
-                      <p className="text-sm text-gray-600">Receiver: {item.receiverAddress.trim() || "Quận 7"}</p>
+                      <p className="text-sm text-gray-600 truncate ...">Glass: {item.eyeGlassName}</p>
+                      {/* <p className="text-sm text-gray-600">Glass Price: {item.eyeGlassPrice}</p> */}
+                      <p className="text-sm text-gray-600 truncate ...">Lens: {item.lensName}</p>
+                      {/* <p className="text-sm text-gray-600">Lens Price: {item.lensPrice}</p> */}
+                      {/* <p className="text-sm text-gray-600">Total Price: {item.totalPriceProductGlass}</p> */}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="mt-4">
+              <p className="text-lg font-bold mb-2">Subtotal: ${cart.totalPrice}</p>
               <button onClick={() => handleToast({
                 type: "info",
                 message: "Functionality is in development!"
-              })} className="w-full bg-teal-500 text-white py-2 rounded">
+              })} className="w-full bg-teal-500 text-white py-2 rounded mb-2">
                 Check out
+              </button>
+              <button onClick={() => handleRedirectToCart()} className="w-full bg-teal-500 text-white py-2 rounded">
+                My Cart
               </button>
             </div>
         </div>
