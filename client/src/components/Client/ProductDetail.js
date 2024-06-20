@@ -21,7 +21,6 @@ const colors = [
     color: "Black",
     hex: "#0d0d0d",
   },
-  // ... Other colors
 ];
 
 const ProductDetail = () => {

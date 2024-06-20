@@ -37,7 +37,7 @@ const OrderConfirmation = () => {
       if (responseCreateOrderProduct?.id && responseCreateOrderDetail) {
         toast.success("Order confirmed successfully!");
         setTimeout(() => {
-          navigate("/");
+          window.location.href = "/order";
         }, 1000);
       } else {
         toast.error("Order failed");
@@ -87,7 +87,7 @@ const OrderConfirmation = () => {
 
       toast.success("Order confirmed successfully!");
       setTimeout(() => {
-        navigate("/");
+        window.location.href = "/order";
       }, 1000);
       clearTimeout();
     } catch (err) {
@@ -101,6 +101,9 @@ const OrderConfirmation = () => {
       paymentOneItem(data, orderData, productGlassData);
     } else if (typePayment === "allItem") {
       paymentAllItem(cartData);
+    } else {
+      setLoading(false);
+      setError("Not found data");
     }
   }, [data, orderData, productGlassData, typePayment]);
 
@@ -145,6 +148,7 @@ const OrderConfirmation = () => {
       setLoading(false);
     } else {
       setPaymentObject({});
+      setLoading(false);
       setError("Not found data");
     }
   };

@@ -21,6 +21,7 @@ const CartStep = () => {
   // Behavior variables
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [error, setError] = useState(null);
 
   // API variables
   const { fetchCartByAccountID, fetchOrderByAccountID, deleteCart } = useEyeGlassService();
@@ -43,6 +44,9 @@ const CartStep = () => {
           setOrder(orderResponse);
           setCart(cartResponse);
           setLoading(false);
+        } else {
+          setLoading(false);
+          setError('No data found');
         }
       }
     };
@@ -108,6 +112,10 @@ const CartStep = () => {
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
   }
 
   return (
