@@ -59,19 +59,29 @@ const Sidebar = () => {
           "bg-teal-500 text-white" : "hover:bg-gray-100 text-gray-600"
           }`}>
           <AiFillHome className="mr-3" />
-          <a onClick={() => handleRedirect("/")} className="flex-1">
+          <a href="/" className="flex-1">
             Homepage
           </a>
         </li>
         {UserInfo && (
+          <>
           <li className={`cursor-pointer flex items-center p-3 rounded-md ${urlParam === "cart" ?
             "bg-teal-500 text-white" : "hover:bg-gray-100 text-gray-600"
             }`}>
             <FaBoxOpen className="mr-3" />
-            <a onClick={() => handleRedirect("cart")} className="flex-1">
+            <a href="/cart" className="flex-1">
               Cart
             </a>
           </li>
+          <li className={`cursor-pointer flex items-center p-3 rounded-md ${urlParam === "order" ?
+            "bg-teal-500 text-white" : "hover:bg-gray-100 text-gray-600"
+            }`}>
+            <FaBoxOpen className="mr-3" />
+            <a href="/order" className="flex-1">
+              Order
+            </a>
+          </li>
+          </>
         )}
         {/* <li className="flex items-center p-3 rounded-md hover:bg-gray-100 text-gray-600">
           <FaClipboardList className="mr-3" />

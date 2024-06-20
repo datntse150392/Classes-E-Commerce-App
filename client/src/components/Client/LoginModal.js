@@ -43,9 +43,6 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
             localStorage.setItem("UserInfo", JSON.stringify(response));
             setUsername('');
             setPassword('');
-            navigate("/order-confirm", {
-                state: { data: data }
-            });
             const [responseCreateOrder, responsecreateProductGlass] = await Promise.all([
                 createOrder(data),
                 createProductGlass(data)
@@ -58,8 +55,13 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
                 toast.success("Order created successfully");
                 setTimeout(() => {
                     navigate("/order-confirm", {
-                        state: { data: data, orderData: responseCreateOrder, productGlassData: responsecreateProductGlass }
-                      })
+                        state: {
+                            data,
+                            orderData: responseCreateOrder,
+                            productGlassData: responsecreateProductGlass,
+                            typePayment: "oneItem"
+                        },
+                    });
                 }, 1000);
             } else {
                 setUsername('');
@@ -73,11 +75,6 @@ const LoginModal = ({ toggle, setDisplayModal, setBodyDialog, data }) => {
         } else {
             setUsername('');
             setPassword('');
-            setBodyDialog({
-                header: 'Payment',
-                body: 'Payment failed',
-                status: 'error',
-            });
             setDisplayModal(false);
             toast.error("Order failed");
             setTimeout(() => {
