@@ -19,7 +19,7 @@ const SelectLenses = () => {
   const [lensTypes, setLensTypes] = useState([]);
   const [lensData, setLensData] = useState(null);
   const [lensOptions, setLensOptions] = useState([]);
-  const UserInfo = localStorage.getItem("UserInfo");
+  const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -456,7 +456,7 @@ const PrescriptionSelection = ({
           </button>
         )}
         <button
-          onClick={handleSubmit}
+          onClick={() => handleSubmit()}
           className="bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:bg-yellow-600 transition"
         >
           Save & Continue
