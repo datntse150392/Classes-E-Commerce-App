@@ -16,9 +16,7 @@ const Homepage = () => {
   const [originalData, setOriginalData] = useState([]);
   const [data, setData] = useState([]);
   const [eyeGlassTypes, setEyeGlassTypes] = useState([]);
-  const [order, setOrder] = useState([]);
   const [cart, setCart] = useState([]);
-  const [totalCartPrice, setTotalCartPrice] = useState(0);
 
   const { setToastMessage } = useToast();
   const [toastMessage, setToastMessageState] = useState(location.state?.toast || {});
@@ -28,7 +26,7 @@ const Homepage = () => {
   const { search } = useContext(SearchContext);
 
   // API variables
-  const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchOrderByAccountID, fetchCartByAccountID } = useEyeGlassService();
+  const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchCartByAccountID } = useEyeGlassService();
 
   // Fetch all eye glass data and eye glass types
   useEffect(() => {
@@ -70,15 +68,11 @@ const Homepage = () => {
     const getCartAndOrder = async () => {
       let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
       if (UserInfo) {
-        const [orderResponse, cartResponse] = await Promise.all([
-          fetchOrderByAccountID(UserInfo.id),
+        const [cartResponse] = await Promise.all([
           fetchCartByAccountID(UserInfo.id)
         ]);
-        if (orderResponse && orderResponse.length > 0 && cartResponse && cartResponse.cartDetails.length > 0) {
+        if (cartResponse && cartResponse.cartDetails.length > 0) {
           // Sort the cart by order date
-          orderResponse.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-          setOrder(orderResponse);
-
           setCart(cartResponse);
         }
       }
@@ -334,12 +328,6 @@ const Homepage = () => {
             </div>
             <div className="mt-4">
               <p className="text-lg font-bold mb-2">Subtotal: ${cart.totalPrice}</p>
-              <button onClick={() => handleToast({
-                type: "info",
-                message: "Functionality is in development!"
-              })} className="w-full bg-teal-500 text-white py-2 rounded mb-2">
-                Check out
-              </button>
               <button onClick={() => handleRedirectToCart()} className="w-full bg-teal-500 text-white py-2 rounded">
                 My Cart
               </button>

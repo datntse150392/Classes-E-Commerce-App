@@ -72,6 +72,8 @@ const Dashboard = () => {
         .then(([accounts, orders, orderDetails, payments, profiles, eyeGlass]) => {
           if (accounts && orders && orderDetails && payments && profiles && eyeGlass) {
             setAccounts(accounts.data);
+            // get order data has total > 0
+            orders.data = orders.data.filter(order => order.total > 0);
             setOrders(orders.data);
             setOrderDetails(orderDetails);
             setPayments(payments);
@@ -145,11 +147,11 @@ const Dashboard = () => {
         if (payment.accountID === account.id) {
           recentTransactions.push({
             id: payment.id,
-            account: account.profiles[0].fullname,
-            totalAmount: payment.totalAmount,
-            status: payment.status,
-            paymentMethod: payment.paymentMethod,
-            date: payment.date
+            account: account?.username,
+            totalAmount: payment?.totalAmount,
+            status: payment?.status,
+            paymentMethod: payment?.paymentMethod,
+            date: payment?.date
           });
         }
       });
@@ -171,9 +173,7 @@ const Dashboard = () => {
         }
       });
     });
-    console.log(orderDetails);
     let topSellProducts = orderDetails.sort((a, b) => b.quantity - a.quantity).slice(0, 3);
-    console.log(topSellProducts);
     setTopSellProducts(topSellProducts);
   }
 

@@ -24,6 +24,8 @@ const Orders = () => {
       ])
         .then(([ordersData, accountData]) => {
           if (ordersData && accountData) {
+            // get order data has total > 0
+            ordersData.data = ordersData.data.filter(order => order.total > 0);
             setData(ordersData.data);
             setAccountData(accountData.data);
             mappingData(ordersData.data, accountData.data);

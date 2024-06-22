@@ -21,7 +21,7 @@ const OrderConfirmation = () => {
   const [address, setAddress] = useState("");
 
   // API variables
-  const { createOrderProduct, createOrderDetail, createOrder, deleteCart } = useEyeGlassService();
+  const { createOrderProduct, createOrderDetail, createOrder, deleteCart, deleteOrder } = useEyeGlassService();
 
   // Behavior variables
   const [loading, setLoading] = useState(true);
@@ -29,13 +29,13 @@ const OrderConfirmation = () => {
 
   const handleConfirm = async () => {
     try {
-      const [responseCreateOrderProduct, responseCreateOrderDetail] = await Promise.all([
+      const [responseCreateOrderProduct] = await Promise.all([
         createOrderProduct(paymentObject),
-        createOrderDetail(paymentObject)
       ]);
 
-      if (responseCreateOrderProduct?.id && responseCreateOrderDetail) {
+      if (responseCreateOrderProduct?.id) {
         toast.success("Order confirmed successfully!");
+        await deleteOrder(paymentObject.orderDetails[0].orderID);
         setTimeout(() => {
           window.location.href = "/order";
         }, 1000);
@@ -54,42 +54,52 @@ const OrderConfirmation = () => {
     }
   
     try {
-      // Loop through paymentAllObject to create orders and order details
-      for (const item of paymentAllObject) {
-        const orderData = { address: address };
-        const responseCreateOrder = await createOrder(orderData);
-  
-        if (responseCreateOrder && responseCreateOrder.id) {
-          const orderDetailData = {
+      let body = {
+        accountID: UserInfo.id,
+        receiverAddress: address,
+        orderDate: new Date(),
+        total: 0,
+        status: true,
+        orderDetails: [],
+      }
+      // Loop for add item of cart to order
+      for (const item of cartData.cartDetails) {
+        body.total += item.totalPriceProductGlass;
+        body.orderDetails.push({
+            productGlassID: item.productGlassID,
             quantity: item.quantity,
             status: true,
-            orderDetails: [
-              {
-                orderID: responseCreateOrder.id,
-                productGlassID: item.productGlassID,
-              },
-            ],
-          };
-  
-          const responseCreateOrderDetail = await createOrderDetail(orderDetailData);
-          if (!responseCreateOrderDetail || !responseCreateOrderDetail.id) {
-            throw new Error("Order failed");
-          }
-  
-          const responseDeleteCart = await deleteCart(UserInfo.id, responseCreateOrderDetail.productGlassID);
-          if (!responseDeleteCart) {
-            throw new Error("Order failed");
-          }
-        } else {
-          throw new Error("Order failed");
-        }
+            productGlassRequest: {
+              eyeGlassID: item.eyeGlassImages[0].eyeGlassID,
+              leftLenID: 39,
+              rightLenID: 39,
+              accountID: UserInfo.id,
+              sphereOD: 2,
+              cylinderOD: 2,
+              axisOD: 2,
+              sphereOS: 2,
+              cylinderOS: 2,
+              axisOS: 2,
+              addOD: 2,
+              addOS: 2,
+              pd: 2,
+              status: true,
+            }
+        });
       }
-
-      toast.success("Order confirmed successfully!");
-      setTimeout(() => {
-        window.location.href = "/order";
-      }, 1000);
-      clearTimeout();
+      const responseCreateOrderProduct = await createOrderProduct(body);
+      if (responseCreateOrderProduct && responseCreateOrderProduct?.id) {
+        cartData.cartDetails.map(async (item) => {
+          await deleteCart(UserInfo.id, item.productGlassID);
+        });
+        toast.success("Order confirmed successfully!");
+        setTimeout(() => {
+          window.location.href = "/order";
+        }, 1000);
+        clearTimeout();
+      } else {
+        toast.error("Order failed");
+      }
     } catch (err) {
       toast.error("Order failed");
     }
@@ -113,6 +123,7 @@ const OrderConfirmation = () => {
         accountID: orderData.accountID,
         receiverAddress: orderData.receiverAddress,
         orderDate: orderData.orderDate,
+        total: data.price,
         status: true,
         orderDetails: [
           {
@@ -164,7 +175,6 @@ const OrderConfirmation = () => {
 
       setPaymentAllObject(allOrderObject);
       setLoading(false);
-      console.log("originalAllObject", cartData);
     } else {
       setPaymentObject({});
       setLoading(false);
