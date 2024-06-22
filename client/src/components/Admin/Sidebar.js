@@ -13,8 +13,19 @@ import {
   faGlasses,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Sidebar = () => {
+  const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  const handleLogout = () => {
+    localStorage.removeItem("UserInfo");
+    toast.success("Logged out successfully!");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   return (
     <div className="w-64 h-screen bg-gray-900 text-white flex flex-col justify-between">
       <div>
@@ -54,7 +65,7 @@ const Sidebar = () => {
           >
             <FontAwesomeIcon icon={faUser} className="mr-2" /> Users
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/admin/calendar"
             className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
           >
@@ -80,25 +91,30 @@ const Sidebar = () => {
             className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
           >
             <FontAwesomeIcon icon={faCog} className="mr-2" /> Settings
-          </NavLink>
+          </NavLink> */}
         </nav>
       </div>
       <div className="p-4 bg-gray-800">
-        <div className="flex items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="Profile"
-            className="rounded-full mr-4"
-          />
-          <div>
-            <p>Charles</p>
-            <p className="text-sm text-gray-400">DistroBoy Store</p>
+        <a
+          onClick={() => handleLogout()}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/unicourse-f4020.appspot.com/o/User%2F9334243.jpg?alt=media&token=86c8bccd-20f7-40e5-bb80-b2d5eb27fe17"
+              alt="Profile"
+              className="rounded-full h-12 w-12 object-cover mr-4"
+            />
+            <div>
+              <p>{UserInfo?.username}</p>
+              <p className="text-sm text-gray-400">Log out</p>
+            </div>
+            <FontAwesomeIcon
+              icon={faSignOutAlt}
+              className="ml-auto text-gray-400"
+            />
           </div>
-          <FontAwesomeIcon
-            icon={faSignOutAlt}
-            className="ml-auto text-gray-400"
-          />
-        </div>
+        </a>
       </div>
     </div>
   );

@@ -14,7 +14,6 @@ const CartStep = () => {
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
   const location = useLocation();
   const navigate = useNavigate();
-  const [order, setOrder] = useState([]);
   const [cart, setCart] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -22,9 +21,10 @@ const CartStep = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [reload, setReload] = useState(false);
 
   // API variables
-  const { fetchCartByAccountID, fetchOrderByAccountID, deleteCart } = useEyeGlassService();
+  const { fetchCartByAccountID, deleteCart, updateCart } = useEyeGlassService();
 
   if (!UserInfo) {
     window.location.href = '/login';
@@ -34,14 +34,11 @@ const CartStep = () => {
   useEffect(() => {
     const getCartAndOrder = async () => {
       if (UserInfo) {
-        const [orderResponse, cartResponse] = await Promise.all([
-          fetchOrderByAccountID(UserInfo.id),
+        const [cartResponse] = await Promise.all([
           fetchCartByAccountID(UserInfo.id)
         ]);
-        if (orderResponse && orderResponse.length > 0 && cartResponse && cartResponse.cartDetails.length > 0) {
+        if (cartResponse && cartResponse.cartDetails.length > 0) {
           // Sort the cart by order date
-          orderResponse.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-          setOrder(orderResponse);
           setCart(cartResponse);
           setLoading(false);
         } else {
@@ -52,29 +49,31 @@ const CartStep = () => {
     };
 
     getCartAndOrder(UserInfo);
-  }, []);
+  }, [reload]);
 
-  const handleChangeQuality = (product, type) => {
+  const handleChangeQuality = async (product, type) => {
+    let data = {
+      accountID: product.accountID,
+      productGlassID: product.productGlassID,
+      quantity: product.quantity
+    };
     if (type === "add") {
       if (product.quantity === 99) {
         return;
       }
-      let newCart = {
-        cartDetails: cart.cartDetails.map((item) => item.productGlassID === product.productGlassID ? { ...item, quantity: item.quantity + 1 } : item),
-        totalItems: cart.totalItems + 1,
-        totalPrice: cart.totalPrice + product.eyeGlassPrice + product.lensPrice
-      };
-      setCart(newCart);
+      data.quantity += 1;
     } else {
       if (product.quantity === 1) {
         return;
       }
-      let newCart = {
-        cartDetails: cart.cartDetails.map((item) => item.productGlassID === product.productGlassID ? { ...item, quantity: item.quantity - 1 } : item),
-        totalItems: cart.totalItems - 1,
-        totalPrice: cart.totalPrice - product.eyeGlassPrice - product.lensPrice
-      }
-      setCart(newCart);
+      data.quantity -= 1;
+    }
+    const responseUpdateCart = await updateCart(data);
+    if (!responseUpdateCart) {
+      toast.error("Failed to update cart");
+    } else {
+      setReload(reload => !reload);
+      toast.success("Cart updated successfully");
     }
   }
 
@@ -173,11 +172,11 @@ const CartStep = () => {
             </div>
             <div className="flex justify-between mb-2">
               <span>Shipment cost</span>
-              <span>$20.00</span>
+              <span>$0</span>
             </div>
             <div className="flex justify-between font-bold mb-4">
               <span>Grand Total</span>
-              <span>${(cart.totalPrice + 20).toFixed(2)}</span>
+              <span>${(cart.totalPrice).toFixed(2)}</span>
             </div>
             <a
               onClick={() => handleCheckout()}

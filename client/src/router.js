@@ -18,6 +18,7 @@ import Users from "./pages/Admin/UsersPage";
 import OrderConfirmation from "./components/Client/OrderConfirmation";
 import CartPage from "./components/Client/CartPage";
 import OrderStatus from "./components/Client/OrderStatus";
+import PaymentStatus from "./components/Client/PaymentStatus";
 
 const AppRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const AppRoutes = () => {
               </ClientLayout>
             }
           />
+          <Route path="/payment-status" element={<PaymentStatus />} />
         </Route>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignUpForm />} />

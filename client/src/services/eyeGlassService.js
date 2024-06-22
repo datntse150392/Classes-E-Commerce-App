@@ -9,12 +9,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -25,12 +23,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -41,12 +37,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -57,12 +51,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -73,12 +65,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -95,12 +85,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -133,12 +121,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             }
             );
@@ -150,14 +136,13 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
+        return null;
     };
 
     // Lấy danh sách order của user
@@ -167,19 +152,16 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
 
     // Tạo cart của user || api/Cart
     const createCart = async (data) => {
-        console.log("DATA: ", data)
         let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
         let body = {
             accountID: UserInfo.id,
@@ -201,12 +183,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -218,12 +198,10 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -235,19 +213,16 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
 
     // Tạo productGlass của user || api/ProductGlass
     const createProductGlass = async (data) => {
-        console.log("DATA: ", data)
         let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
         const body = {
             id: 0,
@@ -271,14 +246,95 @@ export const useEyeGlassService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
+    };
+
+    // /api/Payment/create-payment-url'
+    const createPaymentUrl = async (data) => {
+        const body = {
+            orderId: data.id,
+            accountID: data.accountID,
+            amount: data.total * 25450
+        };
+    
+        // Get the current page URL to use as the return URL
+        const returnUrl = window.location.href;
+        return axios.post(`${baseUrl}/api/Payment/create-payment-url`, body, {
+            headers: {
+                'Return-Url': returnUrl
+            }
+        })
+        .then(response => {
+            if (response.data) {
+                return response.data;
+            } else {
+                return null;
+            }
+        })
+        .catch(error => {
+            return null;
+        });
+    };
+    
+    // Update order || /api/Order
+    const updateOrder = async (data) => {
+        let body = {
+            id: data.id,
+            status: true,
+            senderAddress: data.senderAddress,
+            receiverAddress: data.receiverAddress,
+            code: data.code,
+            process: 1
+        }
+        return axios.put(`${baseUrl}/api/Order`, body)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    return null;
+                }
+            })
+            .catch(error => {
+                return null;
+            }
+            );
+    };
+
+    // delete order || /api/Order/:id
+    const deleteOrder = async (id) => {
+        return axios.delete(`${baseUrl}/api/Order/${id}`)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    return null;
+                }
+            })
+            .catch(error => {
+                return null;
+            }
+            );
+    };
+
+    // Update quantity cart
+    const updateCart = async (data) => {
+        return axios.put(`${baseUrl}/api/Cart/${data.accountID}/${data.productGlassID}?quantity=${data.quantity}`)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    return null;
+                }
+            })
+            .catch(error => {
+                return null;
+            }
+            );
     };
 
     return {
@@ -294,6 +350,10 @@ export const useEyeGlassService = () => {
         createOrderDetail,
         fetchCartByAccountID,
         createCart,
-        deleteCart
+        deleteCart,
+        createPaymentUrl,
+        updateOrder,
+        deleteOrder,
+        updateCart
     };
 };

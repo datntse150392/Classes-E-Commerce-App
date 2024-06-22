@@ -10,12 +10,10 @@ export const useAuthService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
@@ -27,12 +25,10 @@ export const useAuthService = () => {
                 if (response.data) {
                     return response.data;
                 } else {
-                    console.log('No item found in response');
                     return null;
                 }
             })
             .catch(error => {
-                console.log(error);
                 return null;
             });
     };
