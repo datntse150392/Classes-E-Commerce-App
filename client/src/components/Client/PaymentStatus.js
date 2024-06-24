@@ -11,7 +11,6 @@ const PaymentStatus = () => {
   };
 
   useEffect(() => {
-    console.log("STATUS: ", success, orderId);
   }, []);
 
   return (

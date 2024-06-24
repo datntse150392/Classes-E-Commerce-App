@@ -257,7 +257,7 @@ const OrderConfirmation = () => {
             onClick={() => handleConfirmAllItem()}
             className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
           >
-            Confirm Payment
+            Confirm Order
           </button>
         </div>
       )}
