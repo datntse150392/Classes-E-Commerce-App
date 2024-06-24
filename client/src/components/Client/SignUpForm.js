@@ -29,14 +29,10 @@ const SignUpForm = () => {
     const response = await register(username, password, email);
     if (response) {
       localStorage.setItem("UserInfo", JSON.stringify(response));
-      navigate("/", {
-        state: {
-          toast: {
-            type: "success",
-            message: "Register successful"
-          },
-        },
-      });
+      toast.success("Register successful");
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } else {
       toast.error("Register failed");
     }

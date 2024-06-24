@@ -39,6 +39,7 @@ const OrderStatus = () => {
       }
     };
 
+    getResponseFromVnPay();
     initOrderData();
   }, [reload]);
 
@@ -47,9 +48,12 @@ const OrderStatus = () => {
   };
 
   const handleCreatePaymentUrl = async (data) => {
+    // Store order data to localStorage
+    localStorage.removeItem('orderData');
+    localStorage.setItem('orderData', JSON.stringify(data));
     const response = await createPaymentUrl(data);
     if (response && response._statusCode === 200) {
-      window.open(response._data.paymentUrl, '_blank');
+      window.location.href = response._data.paymentUrl;
     } else {
       toast.error('Failed to create payment URL');
     }
@@ -77,6 +81,25 @@ const OrderStatus = () => {
     }).format(money);
     return formatted;
   };
+
+  async function getResponseFromVnPay() {
+    const url = window.location.href;
+    const orderData = JSON.parse(localStorage.getItem('orderData'));
+    // Convert url to object
+    const urlParams = new URLSearchParams(url);
+    if (localStorage !== undefined && orderData !== undefined && urlParams.get('vnp_ResponseCode') === '00') {
+      localStorage.removeItem('orderData');
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.protocol + '//' + window.location.host
+      );
+      const responseUpdateOrder = await updateOrder(orderData);
+      if (responseUpdateOrder && responseUpdateOrder.id) {
+        navigate('/payment-status', { state: { success: true, orderId: orderData.code } });
+      }
+    }
+  }
 
   const processStatus = [
     { name: 'Pending, Đợi thanh toán', color: 'gray', width: '16.6%', icon: faHourglassStart },
