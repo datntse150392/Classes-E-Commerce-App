@@ -64,6 +64,7 @@ const CartStep = () => {
       data.quantity += 1;
     } else {
       if (product.quantity === 1) {
+        handleDeleteCartItem(product);
         return;
       }
       data.quantity -= 1;
@@ -92,6 +93,9 @@ const CartStep = () => {
         cartDetails: cart.cartDetails.filter((item) => item.productGlassID !== selectedProduct.productGlassID),
         totalItems: cart.totalItems - 1,
         totalPrice: cart.totalPrice - selectedProduct.eyeGlassPrice - selectedProduct.lensPrice
+      }
+      if (newCart.cartDetails.length === 0) {
+        setReload(reload => !reload);
       }
       setCart(newCart);
     } else {

@@ -216,9 +216,9 @@ const OrderConfirmation = () => {
           </ul>
           <button
             onClick={handleConfirm}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            className="mt-4 bg-teal-500 text-white px-4 py-2 rounded"
           >
-            Confirm Payment
+            Confirm Order
           </button>
         </div>
       )}
@@ -255,7 +255,7 @@ const OrderConfirmation = () => {
           <p className="text-lg font-bold mt-4">Total: ${originalAllObject.totalPrice}</p>
           <button
             onClick={() => handleConfirmAllItem()}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            className="mt-4 bg-teal-500 text-white px-4 py-2 rounded"
           >
             Confirm Order
           </button>

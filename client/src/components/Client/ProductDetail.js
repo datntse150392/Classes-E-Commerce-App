@@ -13,6 +13,7 @@ import { useEyeGlassService } from "../../services/index";
 
 // IMPORT COMPONENT
 import { Tooltip } from "react-tooltip";
+import ColorSelector from "./ColorSelector";
 
 SwiperCore.use([Navigation, Pagination]);
 
@@ -21,6 +22,108 @@ const colors = [
     color: "Black",
     hex: "#0d0d0d",
   },
+  {
+    color: "White",
+    hex: "#ffffff",
+  },
+  {
+    color: "Red",
+    hex: "#ff0000",
+  },
+  {
+    color: "Green",
+    hex: "#00ff00",
+  },
+  {
+    color: "Blue",
+    hex: "#0000ff",
+  },
+  {
+    color: "Yellow",
+    hex: "#ffff00",
+  },
+  {
+    color: "Cyan",
+    hex: "#00ffff",
+  },
+  {
+    color: "Magenta",
+    hex: "#ff00ff",
+  },
+  {
+    color: "Silver",
+    hex: "#c0c0c0",
+  },
+  {
+    color: "Gray",
+    hex: "#808080",
+  },
+  {
+    color: "Maroon",
+    hex: "#800000",
+  },
+  {
+    color: "Olive",
+    hex: "#808000",
+  },
+  {
+    color: "Purple",
+    hex: "#800080",
+  },
+  {
+    color: "Teal",
+    hex: "#008080",
+  },
+  {
+    color: "Navy",
+    hex: "#000080",
+  },
+  {
+    color: "Orange",
+    hex: "#ffa500",
+  },
+  {
+    color: "Pink",
+    hex: "#ffc0cb",
+  },
+  {
+    color: "Brown",
+    hex: "#a52a2a",
+  },
+  {
+    color: "Lime",
+    hex: "#00ff00",
+  },
+  {
+    color: "Indigo",
+    hex: "#4b0082",
+  },
+  {
+    color: "Gold",
+    hex: "#ffd700",
+  },
+  {
+    color: "Violet",
+    hex: "#ee82ee",
+  },
+  {
+    color: "Turquoise",
+    hex: "#40e0d0",
+  },
+  {
+    color: "Salmon",
+    hex: "#fa8072",
+  },
+  {
+    color: "Khaki",
+    hex: "#f0e68c",
+  },
+  {
+    color: "Plum",
+    hex: "#dda0dd",
+  },
+  { color: "Tortoise", hex: "#c19a6b" },
+  { color: "Rose Gold", hex: "#b76e79" },
 ];
 
 const ProductDetail = () => {
@@ -61,6 +164,7 @@ const ProductDetail = () => {
               ?.hex,
             selectedSize: "Small",
           });
+          console.log("EYEGLASS: ", eyeGlassData);
           setLoading(false);
         }
 
@@ -177,18 +281,10 @@ const ProductDetail = () => {
         </p>
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Colors</h3>
-          <div className="flex space-x-2">
-            <span
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content={data.color}
-              data-tooltip-place="top"
-              className="w-8 h-8 cursor-pointer rounded-full border border-gray-300"
-              style={{ backgroundColor: data.colorHex }}
-            />
-          </div>
+          <ColorSelector colors={data.color} colorHex={data.colorHex} />
         </div>
         <p className="text-xl font-semibold mb-4">${data.price}</p>
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <h3 className="text-lg font-medium mb-2">Size</h3>
           <div className="flex space-x-2">
             {data.sizes &&
@@ -211,7 +307,7 @@ const ProductDetail = () => {
                 )
               )}
           </div>
-        </div>
+        </div> */}
         <button
           className="w-full bg-primary text-white py-3 rounded-full font-semibold hover:bg-primary-dark transition duration-200"
           onClick={handleSelectLensesClick}

@@ -56,7 +56,7 @@ const DialogModal = ({ toggle, setDisplayModal, bodyDialog }) => {
                         <div className="p-4 md:p-5">
                             <form className="space-y-4">
                                 <div>
-                                    <p class="max-w-lg text-3xl font-semibold leading-normal text-gray-900 dark:text-white">
+                                    <p className="max-w-lg text-3xl font-semibold leading-normal text-gray-900 dark:text-white">
                                         {bodyDialog.message}
                                     </p>
                                 </div>
