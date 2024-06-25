@@ -5,9 +5,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useToast } from "../../context/ToastContext";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import SwiperCore from "swiper";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
 // IMPORT API SERVICES
 import { useEyeGlassService } from "../../services/index";
+
+SwiperCore.use([Navigation, Pagination, Autoplay]);
 
 const Homepage = () => {
   // Data variables
@@ -24,6 +32,15 @@ const Homepage = () => {
   // Behavior variables
   const [loading, setLoading] = useState(true);
   const { search } = useContext(SearchContext);
+  const images = [
+    "https://img.ebdcdn.com/cms/H1_Desktop_1600_520_31fad7224d.jpg?q=70&im=Resize,width=2400,height=780,aspect=fill&seo=06-12-grandpa-core-collection-d",
+    "https://img.ebdcdn.com/cms/H1_Desktop_1600_520_53b755d2f4.jpg?q=70&im=Resize,width=2400,height=780,aspect=fill&seo=06-24-30-off-$100+-d"
+  ];
+  const reviewer = [
+    { id: 1, name: "MICKAELIA W.", title: "The website was easy to use, the glasses shipped quickly, and I get nothing but compliments on my new glasses! Thanks!!" },
+    { id: 2, name: "JUAN F.", title: "These glasses fit perfectly! They are super lightweight, yet also feel very sturdy at the same time. The colors and design are beautiful. Will be a returning customer!" },
+    { id: 3, name: "EMILY S.", title: "It's so user friendly and the customer service is incredible! I tell everyone who compliments my glasses (which happens a lot!) to use this site. Thank you!" }
+  ]
 
   // API variables
   const { fetchAllEyeGlass, fetchAllEyeGlassTypes, fetchCartByAccountID } = useEyeGlassService();
@@ -166,11 +183,26 @@ const Homepage = () => {
       <div className="w-3/4 pr-4">
         {/* Banner Section */}
         <div className="bg-pink-200 mb-4">
-          <img
-            src="https://img.ebdcdn.com/cms/H1_Desktop_1600_520_31fad7224d.jpg?q=70&im=Resize,width=2400,height=780,aspect=fill&seo=06-12-grandpa-core-collection-d"
-            alt="Banner"
-            className="w-full"
-          />
+        <Swiper
+        className="w-full"
+        spaceBetween={10}
+        slidesPerView={1}
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{ delay: 3000 }}
+      >
+        {images.map((image, index) => (
+          <SwiperSlide key={index}>
+            <div className="w-full h-[50vh] bg-[#f5f5f5]">
+              <img
+                src={image}
+                alt={`Slide ${index + 1}`}
+                className="h-full w-full rounded-lg object-contain"
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
         </div>
 
         {/* Services Section */}
@@ -279,16 +311,16 @@ const Homepage = () => {
 
       {/* Blog and Cart Section */}
       <div className="w-1/4">
-        {/* Blog Section */}
+        {/* Reviewer Section */}
         <div className="bg-white p-4 shadow rounded-md mb-4">
-          <h2 className="text-lg font-bold mb-2">Blog</h2>
+          <h2 className="text-lg font-bold mb-2">Reviewer</h2>
           <div className="space-y-4">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="flex items-center">
+            {reviewer.map((item, index) => (
+              <div key={item.id} className="flex items-center pb-2 border-b-2 border-gray-500">
                 <div className="custom-bg"></div>
                 <div>
-                  <p className="text-sm">27/05/2023</p>
-                  <p>Decorate your home with recycled products</p>
+                  <p className="text-md font-bold">{item.name}</p>
+                  <p className="text-justify text-sm">{item.title}</p>
                 </div>
               </div>
             ))}

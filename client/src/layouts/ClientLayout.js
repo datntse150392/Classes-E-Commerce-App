@@ -5,6 +5,15 @@ import Footer from "../components/Client/Footer";
 import { SearchContext } from '../context/SearchContext';
 
 const ClientLayout = ({ children }) => {
+  let UserInfo = null;
+
+  try {
+    UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  } catch (error) {}
+
+  if (UserInfo !== undefined && UserInfo?.roleID === 2) {
+    window.location.href = "/admin";
+  }
 
   return (
     <SearchContext.Consumer>

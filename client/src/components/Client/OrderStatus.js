@@ -7,8 +7,13 @@ import { useNavigate } from 'react-router-dom';
 
 const OrderStatus = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(5); // Number of orders per page
   const navigate = useNavigate();
+  const orderCode = JSON.parse(localStorage.getItem("code"));
 
   // API variables
   const { fetchOrderByAccountID, createPaymentUrl, updateOrder } = useEyeGlassService();
@@ -16,7 +21,6 @@ const OrderStatus = () => {
   // Behavior variables
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [reload, setReload] = useState(false);
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
 
   if (!UserInfo) {
@@ -28,9 +32,9 @@ const OrderStatus = () => {
       const response = await fetchOrderByAccountID(UserInfo.id);
       if (response && response.length > 0) {
         response.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        // not get order with total = 0 || status = false
         const initOrders = response.filter(order => order.total > 0 && order.status === true);
         setOrders(initOrders);
+        setFilteredOrders(initOrders);
         setSelectedOrder(initOrders[0]);
         setLoading(false);
       } else {
@@ -41,14 +45,13 @@ const OrderStatus = () => {
 
     getResponseFromVnPay();
     initOrderData();
-  }, [reload]);
+  }, []);
 
   const handleOrderClick = (order) => {
     setSelectedOrder(order);
   };
 
   const handleCreatePaymentUrl = async (data) => {
-    // Store order data to localStorage
     localStorage.removeItem('orderData');
     localStorage.setItem('orderData', JSON.stringify(data));
     const response = await createPaymentUrl(data);
@@ -85,7 +88,6 @@ const OrderStatus = () => {
   async function getResponseFromVnPay() {
     const url = window.location.href;
     const orderData = JSON.parse(localStorage.getItem('orderData'));
-    // Convert url to object
     const urlParams = new URLSearchParams(url);
     if (localStorage !== undefined && orderData !== undefined && urlParams.get('vnp_ResponseCode') === '00') {
       localStorage.removeItem('orderData');
@@ -110,6 +112,21 @@ const OrderStatus = () => {
     { name: 'Canceled, Huỷ', color: 'red', width: '100%', icon: faTimesCircle },
   ];
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    const filtered = orders.filter(order =>
+      order.code.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    setFilteredOrders(filtered);
+    setCurrentPage(1); // Reset to the first page on new search
+  };
+
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   if (loading && !selectedOrder) {
     return <div>Loading...</div>;
   }
@@ -122,6 +139,13 @@ const OrderStatus = () => {
     <div className="flex flex-col items-center justify-center p-6 bg-gray-100 min-h-screen">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full">
         <h2 className="text-2xl font-semibold mb-4">Order Status</h2>
+        <input
+          type="text"
+          placeholder="Search by order code"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="mb-4 p-2 border rounded"
+        />
         {selectedOrder && (
           <div className="mt-8">
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
@@ -139,7 +163,7 @@ const OrderStatus = () => {
                   <div
                     className="w-12 h-12 flex items-center justify-center rounded-full text-white mb-2"
                     style={{
-                      backgroundColor: selectedOrder.process >= index ? status.color : "gray",
+                      backgroundColor: selectedOrder.process >= index ? processStatus[selectedOrder.process].color : "gray",
                     }}
                   >
                     <FontAwesomeIcon icon={status.icon} />
@@ -202,7 +226,7 @@ const OrderStatus = () => {
             )}
           </div>
         )}
-        {orders.map((order) => (
+        {currentOrders.map((order) => (
           <div
             key={order.id}
             className="mb-4 p-4 border rounded-lg cursor-pointer"
@@ -216,6 +240,15 @@ const OrderStatus = () => {
             </div>
           </div>
         ))}
+        <div className="flex justify-center mt-4">
+          <button className="bg-teal-500 text-white p-2 w-12 rounded" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+          <i className="fa-solid fa-circle-chevron-left"></i>
+          </button>
+          <span className="mx-6 content-center">Page {currentPage}</span>
+          <button className="bg-teal-500 text-white p-2 w-12 rounded" onClick={() => paginate(currentPage + 1)} disabled={indexOfLastOrder >= filteredOrders.length}>
+          <i className="fa-solid fa-circle-chevron-right"></i>{" "}
+          </button>
+        </div>
       </div>
     </div>
   );
