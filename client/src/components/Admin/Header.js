@@ -10,7 +10,7 @@ const Header = () => {
     localStorage.removeItem("UserInfo");
     toast.success("Logged out successfully!");
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = "/";
     }, 1000);
   };
 
