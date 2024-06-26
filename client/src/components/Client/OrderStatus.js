@@ -163,7 +163,10 @@ const OrderStatus = () => {
                   <div
                     className="w-12 h-12 flex items-center justify-center rounded-full text-white mb-2"
                     style={{
-                      backgroundColor: selectedOrder.process >= index ? processStatus[selectedOrder.process].color : "gray",
+                      backgroundColor:
+                        selectedOrder.process >= index
+                          ? processStatus[selectedOrder.process].color
+                          : "gray",
                     }}
                   >
                     <FontAwesomeIcon icon={status.icon} />
@@ -176,38 +179,55 @@ const OrderStatus = () => {
               Please wait, we are still processing your order. We will notify
               you for any changes in your order.
             </p>
-            <div className="bg-gray-100 p-4 rounded-lg mb-4">
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Order Code</span>
-                <span>{selectedOrder.code}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Placed on</span>
-                <span>
-                  {new Date(selectedOrder.orderDate).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Sent to</span>
-                <span>{selectedOrder.receiverAddress}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Payment Type</span>
-                <span>Net Banking</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Transaction ID</span>
-                <span>{selectedOrder.id}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Amount Paid</span>
-                <span>${selectedOrder.total}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">Amount Paid (VNĐ)</span>
-                <span>{handleConvertToVND(selectedOrder.total * 25450)}</span>
+            <div className="bg-white shadow-md rounded-lg p-6 mb-4 border border-gray-200">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">
+                    Transaction ID
+                  </span>
+                  <span className="text-gray-800">{selectedOrder.id}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">
+                    Order Code
+                  </span>
+                  <span className="text-gray-800">{selectedOrder.code}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">Sent to</span>
+                  <span className="text-gray-800">
+                    {selectedOrder.receiverAddress}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">
+                    Payment Type
+                  </span>
+                  <span className="text-gray-800">Net Banking</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">
+                    Amount Paid
+                  </span>
+                  <span className="text-gray-800">${selectedOrder.total}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">Placed on</span>
+                  <span className="text-gray-800">
+                    {new Date(selectedOrder.orderDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold text-gray-600">
+                    Amount Paid (VNĐ)
+                  </span>
+                  <span className="text-gray-800">
+                    {handleConvertToVND(selectedOrder.total * 25450)}
+                  </span>
+                </div>
               </div>
             </div>
+
             {selectedOrder.process === 0 && (
               <>
                 <button
@@ -216,12 +236,12 @@ const OrderStatus = () => {
                 >
                   Continue to Pay
                 </button>
-                <button
+                {/* <button
                   onClick={() => fakePaymentSuccessfully(selectedOrder)}
                   className="bg-teal-500 text-white p-2 rounded mb-4"
                 >
                   Trigger Payment Successfully
-                </button>
+                </button> */}
               </>
             )}
           </div>
@@ -241,12 +261,20 @@ const OrderStatus = () => {
           </div>
         ))}
         <div className="flex justify-center mt-4">
-          <button className="bg-teal-500 text-white p-2 w-12 rounded" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
-          <i className="fa-solid fa-circle-chevron-left"></i>
+          <button
+            className="bg-teal-500 text-white p-2 w-12 rounded"
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <i className="fa-solid fa-circle-chevron-left"></i>
           </button>
           <span className="mx-6 content-center">Page {currentPage}</span>
-          <button className="bg-teal-500 text-white p-2 w-12 rounded" onClick={() => paginate(currentPage + 1)} disabled={indexOfLastOrder >= filteredOrders.length}>
-          <i className="fa-solid fa-circle-chevron-right"></i>{" "}
+          <button
+            className="bg-teal-500 text-white p-2 w-12 rounded"
+            onClick={() => paginate(currentPage + 1)}
+            disabled={indexOfLastOrder >= filteredOrders.length}
+          >
+            <i className="fa-solid fa-circle-chevron-right"></i>{" "}
           </button>
         </div>
       </div>

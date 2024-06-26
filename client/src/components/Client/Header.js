@@ -14,7 +14,7 @@ const Header = ({ search, setSearch }) => {
     localStorage.removeItem("UserInfo");
     toast.success("Logged out successfully!");
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = "/";
     }, 1000);
   };
 
@@ -25,9 +25,9 @@ const Header = ({ search, setSearch }) => {
   return (
     <header className="bg-white shadow">
       <ToastContainer />
-      <div className="container mx-auto flex items-center justify-between p-4">
-        <div style={{width: "10rem", height: "100%"}}>
-          <img src="./logo.jpg"
+      <div className="mx-auto flex items-center justify-between p-4">
+        <div className="ml-4" style={{width: "8rem", height: "100%"}}>
+          <img src="./logo1.png"
           
           alt="VisionUp Logo" className="h-full w-full" />{" "}
         </div>

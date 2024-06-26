@@ -280,7 +280,6 @@ const ProductDetail = () => {
             "These full-rim metal frames are currently hot fashion for women and men. The on-trend frame-shape of St. Michael S brings extra elegance with the tasteful Rose Gold finish. The lightweight materials give you extra comfort with adjustable nose pads, for an easy-to-wear comfortable fit"}
         </p>
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Colors</h3>
           <ColorSelector colors={data.color} colorHex={data.colorHex} />
         </div>
         <p className="text-xl font-semibold mb-4">${data.price}</p>

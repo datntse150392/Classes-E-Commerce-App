@@ -261,9 +261,8 @@ const Homepage = () => {
                 name={item.name}
                 price={item.price}
                 rating={item.rate}
-                isNew={index === 0}
+                isNew={index === 0 || index === 3}
                 isHot={index === 1 || index === 2}
-                isSoldOut={index === 3}
                 image={item.eyeGlassImages}
               />
             ))}
