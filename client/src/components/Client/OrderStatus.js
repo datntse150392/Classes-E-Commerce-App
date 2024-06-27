@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useEyeGlassService } from '../../services/index';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHourglassStart, faCogs, faTruck, faBox, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
-import { toast } from 'react-toastify';
+import OrderList from './OrderList';
+import OrderDetail from './OrderDetail';
+import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const OrderStatus = () => {
   const [orders, setOrders] = useState([]);
@@ -11,14 +12,12 @@ const OrderStatus = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage] = useState(5); // Number of orders per page
+  const [ordersPerPage] = useState(5); 
   const navigate = useNavigate();
   const orderCode = JSON.parse(localStorage.getItem("code"));
 
-  // API variables
-  const { fetchOrderByAccountID, createPaymentUrl, updateOrder } = useEyeGlassService();
+  const { fetchAllOrder, fetchOrderByAccountID, createPaymentUrl, updateOrder } = useEyeGlassService();
 
-  // Behavior variables
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
@@ -29,10 +28,12 @@ const OrderStatus = () => {
 
   useEffect(() => {
     const initOrderData = async () => {
-      const response = await fetchOrderByAccountID(UserInfo.id);
-      if (response && response.length > 0) {
-        response.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        const initOrders = response.filter(order => order.total > 0 && order.status === true);
+      // const response = await fetchOrderByAccountID(UserInfo.id);
+      const response = await fetchAllOrder();
+      if (response && response.data.length > 0) {
+        const userOrders = response.data.filter(order => order.accountID === UserInfo.id);
+        userOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+        const initOrders = userOrders.filter(order => order.total > 0 && order.status === true);
         setOrders(initOrders);
         setFilteredOrders(initOrders);
         setSelectedOrder(initOrders[0]);
@@ -103,22 +104,13 @@ const OrderStatus = () => {
     }
   }
 
-  const processStatus = [
-    { name: 'Pending, Đợi thanh toán', color: 'gray', width: '16.6%', icon: faHourglassStart },
-    { name: 'Processing, Đang xử lý', color: 'orange', width: '33.3%', icon: faCogs },
-    { name: 'Shipping, Đang giao', color: 'blue', width: '50%', icon: faTruck },
-    { name: 'Delivered, Đã giao', color: 'green', width: '66.6%', icon: faBox },
-    { name: 'Completed, Đã nhận', color: 'teal', width: '83.3%', icon: faCheckCircle },
-    { name: 'Canceled, Huỷ', color: 'red', width: '100%', icon: faTimesCircle },
-  ];
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
     const filtered = orders.filter(order =>
       order.code.toLowerCase().includes(e.target.value.toLowerCase())
     );
     setFilteredOrders(filtered);
-    setCurrentPage(1); // Reset to the first page on new search
+    setCurrentPage(1); 
   };
 
   const indexOfLastOrder = currentPage * ordersPerPage;
@@ -147,136 +139,22 @@ const OrderStatus = () => {
           className="mb-4 p-2 border rounded"
         />
         {selectedOrder && (
-          <div className="mt-8">
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-              <div
-                className="h-2.5 rounded-full"
-                style={{
-                  width: `${processStatus[selectedOrder.process].width}`,
-                  backgroundColor: processStatus[selectedOrder.process].color,
-                }}
-              ></div>
-            </div>
-            <div className="flex justify-between mb-6">
-              {processStatus.map((status, index) => (
-                <div key={index} className="text-center">
-                  <div
-                    className="w-12 h-12 flex items-center justify-center rounded-full text-white mb-2"
-                    style={{
-                      backgroundColor:
-                        selectedOrder.process >= index
-                          ? processStatus[selectedOrder.process].color
-                          : "gray",
-                    }}
-                  >
-                    <FontAwesomeIcon icon={status.icon} />
-                  </div>
-                  <span>{status.name.split(",")[1]}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-gray-600 mb-4">
-              Please wait, we are still processing your order. We will notify
-              you for any changes in your order.
-            </p>
-            <div className="bg-white shadow-md rounded-lg p-6 mb-4 border border-gray-200">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">
-                    Transaction ID
-                  </span>
-                  <span className="text-gray-800">{selectedOrder.id}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">
-                    Order Code
-                  </span>
-                  <span className="text-gray-800">{selectedOrder.code}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">Sent to</span>
-                  <span className="text-gray-800">
-                    {selectedOrder.receiverAddress}
-                  </span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">
-                    Payment Type
-                  </span>
-                  <span className="text-gray-800">Net Banking</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">
-                    Amount Paid
-                  </span>
-                  <span className="text-gray-800">${selectedOrder.total}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">Placed on</span>
-                  <span className="text-gray-800">
-                    {new Date(selectedOrder.orderDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold text-gray-600">
-                    Amount Paid (VNĐ)
-                  </span>
-                  <span className="text-gray-800">
-                    {handleConvertToVND(selectedOrder.total * 25450)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {selectedOrder.process === 0 && (
-              <>
-                <button
-                  onClick={() => handleCreatePaymentUrl(selectedOrder)}
-                  className="bg-teal-500 text-white p-2 rounded mb-4 mr-4"
-                >
-                  Continue to Pay
-                </button>
-                {/* <button
-                  onClick={() => fakePaymentSuccessfully(selectedOrder)}
-                  className="bg-teal-500 text-white p-2 rounded mb-4"
-                >
-                  Trigger Payment Successfully
-                </button> */}
-              </>
-            )}
-          </div>
+          <OrderDetail
+            selectedOrder={selectedOrder}
+            handleCreatePaymentUrl={handleCreatePaymentUrl}
+            handleConvertToVND={handleConvertToVND}
+          />
         )}
-        {currentOrders.map((order) => (
-          <div
-            key={order.id}
-            className="mb-4 p-4 border rounded-lg cursor-pointer"
-            onClick={() => handleOrderClick(order)}
-          >
-            <div className="flex justify-between">
-              <span>Order Code: {order.code}</span>
-              <span>
-                Placed on: {new Date(order.orderDate).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        ))}
-        <div className="flex justify-center mt-4">
-          <button
-            className="bg-teal-500 text-white p-2 w-12 rounded"
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <i className="fa-solid fa-circle-chevron-left"></i>
-          </button>
-          <span className="mx-6 content-center">Page {currentPage}</span>
-          <button
-            className="bg-teal-500 text-white p-2 w-12 rounded"
-            onClick={() => paginate(currentPage + 1)}
-            disabled={indexOfLastOrder >= filteredOrders.length}
-          >
-            <i className="fa-solid fa-circle-chevron-right"></i>{" "}
-          </button>
-        </div>
+        <OrderList
+          orders={currentOrders}
+          handleOrderClick={handleOrderClick}
+        />
+        <Pagination
+          currentPage={currentPage}
+          paginate={paginate}
+          ordersPerPage={ordersPerPage}
+          totalOrders={filteredOrders.length}
+        />
       </div>
     </div>
   );
