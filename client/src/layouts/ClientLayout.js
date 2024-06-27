@@ -20,7 +20,7 @@ const ClientLayout = ({ children }) => {
       {({ search, setSearch }) => (
         <div className="flex flex-col min-h-screen">
           <Header search={search} setSearch={setSearch} />
-          <div className="flex flex-1">
+          <div className="flex flex-1" style={{ overflowX: "hidden"}}>
             <Sidebar />
             <main className="flex-1 p-4">{children}</main>
           </div>

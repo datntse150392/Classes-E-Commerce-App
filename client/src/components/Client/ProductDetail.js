@@ -164,7 +164,6 @@ const ProductDetail = () => {
               ?.hex,
             selectedSize: "Small",
           });
-          console.log("EYEGLASS: ", eyeGlassData);
           setLoading(false);
         }
 
