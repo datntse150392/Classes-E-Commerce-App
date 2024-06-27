@@ -183,26 +183,26 @@ const Homepage = () => {
       <div className="w-3/4 pr-4">
         {/* Banner Section */}
         <div className="bg-pink-200 mb-4">
-        <Swiper
-        className="w-full"
-        spaceBetween={10}
-        slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 3000 }}
-      >
-        {images.map((image, index) => (
-          <SwiperSlide key={index}>
-            <div className="w-full h-[50vh] bg-[#f5f5f5]">
-              <img
-                src={image}
-                alt={`Slide ${index + 1}`}
-                className="h-full w-full rounded-lg object-contain"
-              />
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+          <Swiper
+            className="w-full"
+            spaceBetween={10}
+            slidesPerView={1}
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3000 }}
+          >
+            {images.map((image, index) => (
+              <SwiperSlide key={index}>
+                <div className="w-full h-[50vh] bg-[#f5f5f5]">
+                  <img
+                    src={image}
+                    alt={`Slide ${index + 1}`}
+                    className="h-full w-full rounded-lg object-contain"
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         {/* Services Section */}
@@ -235,17 +235,22 @@ const Homepage = () => {
           <h2 className="text-xl font-bold mb-2">CÁC LOẠI MẮT KÍNH</h2>
           <div className="flex justify-between mb-2">
             <div className="flex flex-wrap">
-              {eyeGlassTypes.map(
-                (category, index) => (
-                  category.isChoiced ? (
-                    <button key={index} className="bg-teal-500 text-white mr-2 mb-2 px-4 py-2 rounded">
-                      {category.glassType}
-                    </button>
-                  ) : (
-                    <button onClick={() => changeEyeGlassTypes(category)} key={index} className="bg-gray-100 mr-2 mb-2 px-4 py-2 rounded">
-                      {category.glassType}
-                    </button>
-                  )
+              {eyeGlassTypes.map((category, index) =>
+                category.isChoiced ? (
+                  <button
+                    key={index}
+                    className="bg-teal-500 text-white mr-2 mb-2 px-4 py-2 rounded"
+                  >
+                    {category.glassType}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => changeEyeGlassTypes(category)}
+                    key={index}
+                    className="bg-gray-100 mr-2 mb-2 px-4 py-2 rounded"
+                  >
+                    {category.glassType}
+                  </button>
                 )
               )}
             </div>
@@ -309,13 +314,21 @@ const Homepage = () => {
       </div>
 
       {/* Blog and Cart Section */}
-      <div className="w-1/4">
+      <div
+        className="w-1/4"
+        style={{
+          maxWidth: "24%",
+        }}
+      >
         {/* Reviewer Section */}
         <div className="bg-white p-4 shadow rounded-md mb-4">
           <h2 className="text-lg font-bold mb-2">Reviewer</h2>
           <div className="space-y-4">
             {reviewer.map((item, index) => (
-              <div key={item.id} className="flex items-center pb-2 border-b-2 border-gray-500">
+              <div
+                key={item.id}
+                className="flex items-center pb-2 border-b-2 border-gray-500"
+              >
                 <div className="custom-bg"></div>
                 <div>
                   <p className="text-md font-bold">{item.name}</p>
@@ -328,28 +341,35 @@ const Homepage = () => {
 
         {/* Cart Section */}
         {cart && cart.cartDetails && cart.cartDetails.length > 0 && (
-        <div className="bg-white p-4 shadow rounded-md mb-4">
-          <h2 className="text-lg font-bold mb-2">Cart</h2>
+          <div className="bg-white p-4 shadow rounded-md mb-4">
+            <h2 className="text-lg font-bold mb-2">Cart</h2>
             <div className="space-y-4">
               {cart.cartDetails.map((item, index) => (
-                <div key={index}
+                <div
+                  key={index}
                   className="cursor-pointer flex justify-between items-center border-t-2 py-2"
                   style={{
-                    marginTop: 0
-                  }}>
+                    marginTop: 0,
+                  }}
+                >
                   <div className="flex items-center">
                     <div
                       className="h-12 w-12 mr-2"
                       style={{
-                        backgroundImage: "url('https://img.icons8.com/bubbles/100/shopping-cart-loaded.png')",
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
+                        backgroundImage:
+                          "url('https://img.icons8.com/bubbles/100/shopping-cart-loaded.png')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
                       }}
                     ></div>
                     <div className="content-center">
-                      <p className="text-sm text-gray-600 truncate ...">Glass: {item.eyeGlassName}</p>
+                      <p className="text-sm text-gray-600 truncate ...">
+                        Glass: {item.eyeGlassName}
+                      </p>
                       {/* <p className="text-sm text-gray-600">Glass Price: {item.eyeGlassPrice}</p> */}
-                      <p className="text-sm text-gray-600 truncate ...">Lens: {item.lensName}</p>
+                      <p className="text-sm text-gray-600 truncate ...">
+                        Lens: {item.lensName}
+                      </p>
                       {/* <p className="text-sm text-gray-600">Lens Price: {item.lensPrice}</p> */}
                       {/* <p className="text-sm text-gray-600">Total Price: {item.totalPriceProductGlass}</p> */}
                     </div>
@@ -358,12 +378,17 @@ const Homepage = () => {
               ))}
             </div>
             <div className="mt-4">
-              <p className="text-lg font-bold mb-2">Subtotal: ${cart.totalPrice}</p>
-              <button onClick={() => handleRedirectToCart()} className="w-full bg-teal-500 text-white py-2 rounded">
+              <p className="text-lg font-bold mb-2">
+                Subtotal: ${cart.totalPrice}
+              </p>
+              <button
+                onClick={() => handleRedirectToCart()}
+                className="w-full bg-teal-500 text-white py-2 rounded"
+              >
                 My Cart
               </button>
             </div>
-        </div>
+          </div>
         )}
       </div>
     </div>

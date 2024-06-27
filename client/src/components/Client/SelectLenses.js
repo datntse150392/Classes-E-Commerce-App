@@ -24,11 +24,17 @@ const SelectLenses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayModal, setDisplayModal] = useState(false);
+  const [isApiCallInProgress, setIsApiCallInProgress] = useState(false); // Flag to indicate API call in progress
 
   const { fetchLensType, getAllLens, createOrder, createProductGlass, createCart } =
     useEyeGlassService();
 
   const handleLensSelect = (lens) => {
+    if (isApiCallInProgress) {
+      toast.warn("Please wait, your previous action is still processing.");
+      return;
+    }
+
     let updatedData = { ...originalData, lensData: lens };
     setData(updatedData);
     setSelectedLens(lens);
@@ -79,61 +85,95 @@ const SelectLenses = () => {
   }, [productData, id, navigate]);
 
   const handleChangeValue = (e, key) => {
+    if (isApiCallInProgress) {
+      toast.warn("Please wait, your previous action is still processing.");
+      return;
+    }
+
     let updatedData = { ...data, [key]: e.target.value };
     setData(updatedData);
   };
 
   const handleSubmit = async () => {
+    if (isApiCallInProgress) {
+      toast.warn("Please wait, your previous action is still processing.");
+      return;
+    }
+
     const canSubmit = validateForm();
     if (!canSubmit) {
       return;
     }
 
+    setIsApiCallInProgress(true); // Set API call flag
+
     if (!UserInfo) {
       setDisplayModal(true);
+      setIsApiCallInProgress(false); // Reset API call flag
     } else {
-      const [responseCreateOrder, responsecreateProductGlass] = await Promise.all([
-        createOrder(data),
-        createProductGlass(data),
-      ]);
-      if (
-        responseCreateOrder.status &&
-        responsecreateProductGlass &&
-        responsecreateProductGlass.id
-      ) {
-        toast.success("Order successful");
-        navigate("/order-confirm", {
-          state: {
-            data,
-            orderData: responseCreateOrder,
-            productGlassData: responsecreateProductGlass,
-            typePayment : "oneItem"
-          },
-        });
-      } else {
-        setDisplayModal(false);
+      try {
+        const [responseCreateOrder, responsecreateProductGlass] = await Promise.all([
+          createOrder(data),
+          createProductGlass(data),
+        ]);
+        if (
+          responseCreateOrder.status &&
+          responsecreateProductGlass &&
+          responsecreateProductGlass.id
+        ) {
+          toast.success("Order successful");
+          navigate("/order-confirm", {
+            state: {
+              data,
+              orderData: responseCreateOrder,
+              productGlassData: responsecreateProductGlass,
+              typePayment : "oneItem"
+            },
+          });
+        } else {
+          setDisplayModal(false);
+          toast.error("Order failed");
+        }
+      } catch (error) {
+        console.error("Error creating order:", error);
         toast.error("Order failed");
+      } finally {
+        setIsApiCallInProgress(false); // Reset API call flag
       }
     }
   };
 
   const handleAddToCart = async () => {
+    if (isApiCallInProgress) {
+      toast.warn("Please wait, your previous action is still processing.");
+      return;
+    }
+
     const canSubmit = validateForm();
     if (!canSubmit) {
       return;
     }
 
-    const [responseCreateCart] = await Promise.all([
-      createCart(data)
-    ]);
-    if ( responseCreateCart && responseCreateCart.accountID !== undefined) {
-      toast.success("Add to cart successful");
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
-      clearTimeout();
-    } else {
+    setIsApiCallInProgress(true); // Set API call flag
+
+    try {
+      const [responseCreateCart] = await Promise.all([
+        createCart(data)
+      ]);
+      if (responseCreateCart && responseCreateCart.accountID !== undefined) {
+        toast.success("Add to cart successful");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+        clearTimeout();
+      } else {
+        toast.error("Add to cart failed");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
       toast.error("Add to cart failed");
+    } finally {
+      setIsApiCallInProgress(false); // Reset API call flag
     }
   };
 
@@ -449,7 +489,7 @@ const PrescriptionSelection = ({
       <div className="mt-6 flex justify-end">
         {UserInfo && (
           <button
-            onClick={handleAddToCart}
+            onClick={() => handleAddToCart()}
             className="bg-yellow-500 text-white p-4 mr-2 rounded-lg shadow-md hover:bg-yellow-600 transition"
           >
             Add to Cart
