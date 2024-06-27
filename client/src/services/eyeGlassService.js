@@ -160,6 +160,21 @@ export const useEyeGlassService = () => {
             });
     };
 
+    // Lấy danh sách tất cả order
+    const fetchAllOrder = async () => {
+        return axios.get(`${baseUrl}/api/Order?PageSize=1000`)
+            .then(response => {
+                if (response.data) {
+                    return response.data;
+                } else {
+                    return null;
+                }
+            })
+            .catch(error => {
+                return null;
+            });
+    };
+
     // Tạo cart của user || api/Cart
     const createCart = async (data) => {
         let UserInfo = JSON.parse(localStorage.getItem("UserInfo"));
@@ -354,6 +369,7 @@ export const useEyeGlassService = () => {
         createPaymentUrl,
         updateOrder,
         deleteOrder,
-        updateCart
+        updateCart,
+        fetchAllOrder
     };
 };
